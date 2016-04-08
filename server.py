@@ -2,6 +2,10 @@
 
 from __future__ import print_function, division, absolute_import
 
+if __name__ == '__main__':
+    activate_this = '/var/www/pheweb/venv/bin/activate_this.py'
+    execfile(activate_this, dict(__file__=activate_this))
+
 import psycopg2
 import json
 
@@ -16,10 +20,13 @@ curs = conn.cursor()
 
 @app.route('/api/autocomplete/<query>')
 def autocomplete(query):
-    curs.execute("SELECT name FROM pheweb.variants WHERE name LIKE %s LIMIT 10",
-                 (query + '%',))
-    suggestions = [r[0] for r in curs]
-    return Response(json.dumps(suggestions), mimetype='application/json')
+    try:
+        curs.execute("SELECT name FROM pheweb.variants WHERE name LIKE %s LIMIT 10",
+                     (query + '%',))
+        suggestions = [r[0] for r in curs]
+        return Response(json.dumps(suggestions), mimetype='application/json')
+    except:
+        abort(404)
 
 @app.route('/api/icd9_info/<phewas_code>')
 def api_icd9_info(phewas_code):
@@ -48,14 +55,14 @@ def get_variant(variant_name):
     curs.execute('SELECT '
                  'pheweb.categories.name, '
                  'pheweb.phenos.num_cases, pheweb.phenos.num_controls, pheweb.phenos.phewas_code, pheweb.phenos.phewas_string, '
-                 'pheweb.associations.pval '
+                 'pheweb.associations.pval, pheweb.associations.beta '
                  'FROM pheweb.associations '
                  'JOIN pheweb.phenos ON pheweb.associations.pheno_id = pheweb.phenos.id '
                  'JOIN pheweb.categories ON pheweb.categories.id = pheweb.phenos.category_id '
                  'WHERE pheweb.associations.variant_id = %s '
                  'ORDER BY pheweb.phenos.phewas_code',
                  (variant_id,))
-    phenos = list(dict(zip('category_name num_cases num_controls phewas_code phewas_string pval'.split(),r)) for r in curs)
+    phenos = list(dict(zip('category_name num_cases num_controls phewas_code phewas_string pval beta'.split(),r)) for r in curs)
     assert len(phenos) > 0
     return {
         'variant_name': variant_name,
@@ -74,8 +81,7 @@ def variant_page(query):
         return render_template('variant.html',
                                variant=variant)
     except:
-        # abort(404) # TODO: use this.
-        raise
+        abort(404)
 
 @app.route('/')
 def homepage():
@@ -94,4 +100,4 @@ def error_page(message):
 
 
 if __name__ == '__main__':
-    app.run(host='browser.sph.umich.edu', port=5000, debug=True)
+    app.run(host='browser.sph.umich.edu', port=443, debug=False)
