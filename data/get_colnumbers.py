@@ -21,10 +21,12 @@ def get_phenos():
     bad_phenos = {}
     with open(phewas_codes_filename) as f:
         for pheno in csv.DictReader(f, delimiter='\t'):
-            if int(pheno['case']) >= 20:
-                phenos[pheno['phewasCode']] = dict(num_controls=int(pheno['control']), num_cases=int(pheno['case']))
+            if pheno['MatchedCases'] != 'NA':
+                assert int(pheno['MatchedCases']) >= 20
+                phenos[pheno['phewas_code']] = dict(num_controls=int(pheno['MatchedControls']), num_cases=int(pheno['MatchedCases']))
             else:
-                bad_phenos[pheno['phewasCode']] = dict(num_controls=int(pheno['control']), num_cases=int(pheno['case']))
+                assert pheno['MatchedControls'] == 'NA'
+                bad_phenos[pheno['phewas_code']] = dict()
     assert 1400 <= len(phenos) <= 1500
     assert 200 <= len(bad_phenos) <= 500
     return phenos
