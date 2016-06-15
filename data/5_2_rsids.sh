@@ -5,6 +5,7 @@ set -euo pipefail
 PROJECT_DIR="$( cd "$( dirname "$( dirname "${BASH_SOURCE[0]}" )" )" && pwd )"
 source "$PROJECT_DIR/config.config"
 
+mkdir -p "$data_dir/dbSNP/"
 
 if ! [[ -e "$data_dir/dbSNP/dbsnp-b147-GRCh37.gz" ]]; then
     echo downloading!
