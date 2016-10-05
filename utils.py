@@ -44,7 +44,7 @@ def parse_marker_id(marker_id):
     if chr1 != chr2 or pos1 != pos2:
         raise Exception("ERROR: chr:pos don't match between the two sides of MARKER_ID : {!r}".format(marker_id))
     return chr1, int(pos1), ref, alt
-parse_marker_id.regex = re.compile(r'([^:]+):([0-9]+)_([-ATCG]+)/([-ATCG]+)_(?:chr)?([^:]+):([0-9]+)')
+parse_marker_id.regex = re.compile(r'([^:]+):([0-9]+)_([-ATCG\.]+)/([-ATCG\.]+)_(?:chr)?([^:]+):([0-9]+)')
 
 def make_marker_id(chrom, pos, ref, alt):
     return '{chrom}:{pos}_{ref}/{alt}_{chrom}:{pos}'.format(chrom=chrom, pos=pos, ref=ref, alt=alt)
