@@ -46,7 +46,6 @@ def convert(conversion_to_do):
     print('{}\t{} -> {}'.format(datetime.datetime.now(), pheno['phenocode'], dest_filename))
     os.rename(tmp_filename, dest_filename)
 
-# TODO: make this use itertools.groupby on chr-pos instead of these hacks.
 def _convert(pheno, out_filename):
     with open(out_filename, 'w') as f_out:
 
@@ -60,6 +59,8 @@ def _convert(pheno, out_filename):
 
         # Print out each site_variant along with some info from a pheno_variant that matches it.
         # We're assuming that every site_variant has a matching pheno_variant.
+        # TODO: stop assuming that.  Only keep variants that are in both lists.
+        # TODO: convert from chrom_string to chrom_index for intersecting.
         chroms_seen_before = set()
         site_variant = next(site_variants)
         pheno_variant = next(pheno_variants)
