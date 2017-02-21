@@ -1,4 +1,23 @@
 
+
+# LATER:have 900 bins for 0-10, and 100 more for 10-max.
+#       then the plotting code will fold the plot.
+# TODO: obs_neglog10pval_fold = 1.5 * exp_neglog10_fold
+#       the current value of 9 is ideal for 9M variants.
+# TODO: compare qq on three current phewebs.
+#       ask Sarah & Ellen their opinion.
+# TODO: deal with pval=0 variants.
+# TODO: bins should be horizontal.
+#       on the vertical axis, every position can be filled.
+#       but, we'll do some sort of de-duping on the y-axis.
+#       1. walk upwards within an x-bin.
+#       2. include the first point you encounter
+#       3. exclude any points for x-bin-width
+#       4. repeat from (2)
+#       then hopefully we'll only need 100 bins
+#       (right now QQ is pretty slow)
+
+
 from .. import utils
 conf = utils.conf
 
@@ -19,21 +38,6 @@ NUM_BINS = 1000
 
 NUM_MAF_RANGES = 4
 
-Variant = collections.namedtuple('Variant', ['neglog10_pval', 'maf'])
-def get_variants(f, fname=None):
-    for v in csv.DictReader(f, delimiter='\t'):
-        pval = v['pval']
-        try:
-            pval = float(pval)
-        except ValueError:
-            continue
-        maf = float(v['maf'])
-        if pval != 0:
-            yield Variant(-math.log10(pval), maf)
-        else:
-            print("Warning: There's a variant with pval 0 in {!r}.  (Variant: {!r})".format(fname, v))
-
-
 def approx_equal(a, b, tolerance=1e-4):
     return abs(a-b) <= max(abs(a), abs(b)) * tolerance
 assert approx_equal(42, 42.0000001)
@@ -52,6 +56,27 @@ assert approx_equal(gc_value(0.49), 1.047457) # I computed these using that R co
 assert approx_equal(gc_value(0.5), 1)
 assert approx_equal(gc_value(0.50001), 0.9999533)
 assert approx_equal(gc_value(0.6123), 0.5645607)
+
+
+def get_conf_int(nvar):
+    # 95% CI
+    # TODO: always have ten slices (and overshoot a little)
+    #       but I don't understand how these are used, so I'm not sure what gets replaced.
+    slices = []
+    for x in range(0, int(math.ceil(math.log(nvar,2)))):
+        slices.append(2**x)
+    slices.append(nvar-1);
+    slices.reverse()
+
+    points = []
+    for slice in slices:
+        rv = scipy.stats.beta(slice, nvar-slice)
+        points.append((
+            round(-math.log10((slice-0.5)/nvar),2),
+            round(-math.log10(rv.ppf(0.05/2)),2), 
+            round(-math.log10(rv.ppf(1-(0.05/2))),2)
+        ))
+    return points 
 
 
 def compute_qq(neglog10_pvals):
@@ -143,6 +168,24 @@ def make_json_file(args):
         print(exc)
         print('---')
         raise
+
+AssocResult = collections.namedtuple('AssocResult', 'chrom pos pval other'.split())
+def get_variants(f):
+    reader = csv.DictReader(f, delimiter='\t')
+    for v in reader:
+        chrom = v.pop('chrom')
+        pos = int(v.pop('pos'))
+        try:
+            pval = float(v.pop('pval'))
+        except ValueError:
+            continue
+        v['maf'] = float(v['maf'])
+        for key in ['beta', 'sebeta']:
+            try:
+                v[key] = float(v[key])
+            except (ValueError, KeyError):
+                continue
+        yield AssocResult(chrom, pos, pval, v)
 
 
 def get_conversions_to_do():
