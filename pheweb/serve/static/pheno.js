@@ -100,16 +100,74 @@ function create_gwas_plot(variant_bins, unbinned_variants) {
                      })()));
 
         var y_scale = d3.scale.linear()
-            .domain([highest_plot_neglog10_pval, 0])
-            // 0.97 leaves a little space above points clamped to the top.
-            .range([0, plot_height*.97])
-            .clamp(true);
+        if (highest_plot_neglog10_pval <= 40) {
+            y_scale = y_scale
+                .domain([highest_plot_neglog10_pval, 0])
+                .range([0, plot_height*.97]) // 0.97 leaves a little space above points clamped to the top.
+                .clamp(true);
+        } else {
+            y_scale = y_scale
+                .domain([highest_plot_neglog10_pval, 20, 0])
+                .range([0, plot_height*0.97/2, plot_height*.97])
+                .clamp(true);
+        }
+
+        var yAxis = d3.svg.axis()
+            .scale(y_scale)
+            .orient("left")
+            .tickFormat(d3.format("d"));
+        if (highest_plot_neglog10_pval <= 20) {
+            yAxis = yAxis.tickValues([0,4,8,12,16,20]);
+        } else if (highest_plot_neglog10_pval <= 40) {
+            yAxis = yAxis.tickValues([0,8,16,24,32,40]);
+        } else {
+            // TODO: optimize this.
+            yAxis = yAxis.tickValues([0,10,20,60,100,140,180,220,260,300,340,highest_plot_neglog10_pval]);
+        }
+        gwas_plot.append("g")
+            .attr("class", "y axis")
+            .attr('transform', 'translate(-8,0)') // avoid letting points spill through the y axis.
+            .call(yAxis);
+
+        gwas_svg.append('text')
+            .style('text-anchor', 'middle')
+            .attr('transform', fmt('translate({0},{1})rotate(-90)',
+                                   plot_margin.left*.4,
+                                   plot_height/2 + plot_margin.top))
+            .text('-log\u2081\u2080(p-value)'); // Unicode subscript "10"
+
+        var chroms_and_midpoints = (function() {
+            var v = get_chrom_offsets();
+            return v.chroms.map(function(chrom) {
+                return {
+                    chrom: chrom,
+                    midpoint: v.chrom_genomic_start_positions[chrom] + (v.chrom_extents[chrom][1] - v.chrom_extents[chrom][0]) / 2,
+                };
+            });
+        })();
 
         var color_by_chrom = d3.scale.ordinal()
             .domain(get_chrom_offsets().chroms)
             .range(['rgb(120,120,186)', 'rgb(0,0,66)']);
         //colors to maybe sample from later:
         //.range(['rgb(120,120,186)', 'rgb(0,0,66)', 'rgb(44,150,220)', 'rgb(40,60,80)', 'rgb(33,127,188)', 'rgb(143,76,176)']);
+
+        gwas_svg.selectAll('text.chrom_label')
+            .data(chroms_and_midpoints)
+            .enter()
+            .append('text')
+            .style('text-anchor', 'middle')
+            .attr('transform', function(d) {
+                return fmt('translate({0},{1})',
+                           plot_margin.left + x_scale(d.midpoint),
+                           plot_height + plot_margin.top + 20);
+            })
+            .text(function(d) {
+                return d.chrom;
+            })
+            .style('fill', function(d) {
+                return color_by_chrom(d.chrom);
+            });
 
         gwas_plot.append('line')
             .attr('x1', 0)
@@ -244,49 +302,6 @@ function create_gwas_plot(variant_bins, unbinned_variants) {
         }
         pp3();
 
-        // Axes
-        var yAxis = d3.svg.axis()
-            .scale(y_scale)
-            .orient("left")
-            .tickFormat(d3.format("d"));
-        gwas_plot.append("g")
-            .attr("class", "y axis")
-            .attr('transform', 'translate(-8,0)') // avoid letting points spill through the y axis.
-            .call(yAxis);
-
-        gwas_svg.append('text')
-            .style('text-anchor', 'middle')
-            .attr('transform', fmt('translate({0},{1})rotate(-90)',
-                                   plot_margin.left*.4,
-                                   plot_height/2 + plot_margin.top))
-            .text('-log\u2081\u2080(p-value)'); // Unicode subscript "10"
-
-        var chroms_and_midpoints = (function() {
-            var v = get_chrom_offsets();
-            return v.chroms.map(function(chrom) {
-                return {
-                    chrom: chrom,
-                    midpoint: v.chrom_genomic_start_positions[chrom] + (v.chrom_extents[chrom][1] - v.chrom_extents[chrom][0]) / 2,
-                };
-            });
-        })();
-
-        gwas_svg.selectAll('text.chrom_label')
-            .data(chroms_and_midpoints)
-            .enter()
-            .append('text')
-            .style('text-anchor', 'middle')
-            .attr('transform', function(d) {
-                return fmt('translate({0},{1})',
-                           plot_margin.left + x_scale(d.midpoint),
-                           plot_height + plot_margin.top + 20);
-            })
-            .text(function(d) {
-                return d.chrom;
-            })
-            .style('fill', function(d) {
-                return color_by_chrom(d.chrom);
-            });
     });
 }
 
