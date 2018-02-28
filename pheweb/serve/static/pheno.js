@@ -88,7 +88,7 @@ function create_gwas_plot(variant_bins, unbinned_variants) {
 
         // 1.03 puts points clamped to the top (pval=0) slightly above other points.
         var highest_plot_neglog10_pval = 1.03 * -Math.log10(
-            Math.min(significance_threshold*0.8,
+            Math.min(significance_threshold/10,
                      (function() {
                          var best_unbinned_pval = d3.min(unbinned_variants, function(d) {
                              return (d.pval === 0) ? 1 : d.pval;
@@ -99,6 +99,15 @@ function create_gwas_plot(variant_bins, unbinned_variants) {
                          });
                      })()));
 
+        // TODO: this puts 16 (top) too close to 12 on <http://localhost:5000/pheno/1>
+        // TODO: algorithm I'd prefer: (goals: 4-8 ticks, use [4i, 5i, 10i, 20i, 40i, 50i, 100i, 200i, 400i], bfold@20 and show 20 when max>=40)
+        //   - compute max (strongest non-infinite pval) (if <12, 12)
+        //   - for graphs with 12<=max<24, show multiples of 4 up to max (and including max but never above it)
+        //   - for graphs with 24<max<=40, show multiples of 8 up to max (and including max but never above it)
+        //   - for graphs with 40<max<=100, fold@20 w/ ticks=[0,10,20] + [10i up to & including max but never above it]
+        //   - for graphs with 100<max<=1000, fold@20 w/ ticks=[0,10,20] + [
+        //  1. use heuristics for common values.
+        //  2. simplify to just use 1,2,4,5 * 10^i and fold@20 when max>=40
         var y_scale = d3.scale.linear()
         if (highest_plot_neglog10_pval <= 40) {
             y_scale = y_scale
@@ -112,18 +121,28 @@ function create_gwas_plot(variant_bins, unbinned_variants) {
                 .clamp(true);
         }
 
+        function get_y_ticks() {
+            var ticks = [];
+            if (highest_plot_neglog10_pval <= 40) {
+                for (var t=0; t<=highest_plot_neglog10_pval; t+=4) { ticks.push(t) }
+            } else {
+                ticks.push(0,4,8,12,16,20);
+                var step;
+                if (highest_plot_neglog10_pval < 20 + 8*8) { step = 10; }
+                else if (highest_plot_neglog10_pval < 20 + 8*20) { step = 20; }
+                else if (highest_plot_neglog10_pval < 20 + 8*50) { step = 50; }
+                else if (highest_plot_neglog10_pval < 20 + 8*100) { step = 100; }
+                else { step = 500; }
+                for (var t=20; t<=highest_plot_neglog10_pval; t+=step) { ticks.push(t) }
+            }
+            return ticks;
+        }
+
         var yAxis = d3.svg.axis()
             .scale(y_scale)
             .orient("left")
-            .tickFormat(d3.format("d"));
-        if (highest_plot_neglog10_pval <= 20) {
-            yAxis = yAxis.tickValues([0,4,8,12,16,20]);
-        } else if (highest_plot_neglog10_pval <= 40) {
-            yAxis = yAxis.tickValues([0,8,16,24,32,40]);
-        } else {
-            // TODO: optimize this.
-            yAxis = yAxis.tickValues([0,10,20,60,100,140,180,220,260,300,340,highest_plot_neglog10_pval]);
-        }
+            .tickFormat(d3.format("d"))
+            .tickValues(get_y_ticks());
         gwas_plot.append("g")
             .attr("class", "y axis")
             .attr('transform', 'translate(-8,0)') // avoid letting points spill through the y axis.
