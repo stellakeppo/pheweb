@@ -1,4 +1,7 @@
 
+from ..utils import PheWebError
+
+
 def run_flask_dev_server(app, args):
     app.run(
         host=args.host, port=args.port,
@@ -111,6 +114,8 @@ def run(argv):
     parser.add_argument('--urlprefix', default='', help='sub-path at which to host this server')
     args = parser.parse_args(argv)
 
+    if args != '' and not args.startswith('/'):
+        raise PheWeb
     from ..conf_utils import conf
     conf.urlprefix = args.urlprefix
     # TODO: does urlprefix need to start with '/'?  end with it?  be consistent and enforce it.
