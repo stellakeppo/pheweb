@@ -1,0 +1,8 @@
+{
+    "phenolist": "/mnt/pheweb-r2-update1/pheno-list.json.orig",
+    "pheno": "R2_COV_PHENO_EXTRA_SEXPOCSFIXED.txt",
+    "phenoname": "FINNGEN_ENDPOINTS_DF2_FINAL_2018-11-12.tsv",
+    "category": "FG_class_definitions.txt",
+    "nomesco": "ExcelSearchResult_Nomesco_koodistopalvelu.txt",
+    "html": "pheweb/pheweb/serve/static/endpoints"
+}
