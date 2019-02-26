@@ -291,14 +291,7 @@ function create_gwas_plot(variant_bins, unbinned_variants) {
             .attr('transform', fmt('translate({0},{1})rotate(-90)',
                                    plot_margin.left*.4,
                                    plot_height/2 + plot_margin.top))
-        .text(function() {
-        var maxLogLogP = d3.max(unbinned_variants, function(d) { return d.pScaled });
-        return maxLogLogP <= window.vis_conf.loglog_threshold ?
-            '-log\u2081\u2080(p-value)' :
-            window.vis_conf.loglog_threshold == 10 ?
-            '-log\u2081\u2080(p-value) or ' + window.vis_conf.loglog_threshold + ' \u2022 log\u2081\u2080(-log\u2081\u2080(p-value))':
-            '-log\u2081\u2080(p-value) or ' + window.vis_conf.loglog_threshold + ' \u2022 log\u2081\u2080(-log\u2081\u2080(p-value)) / log\u2081\u2080(' + window.vis_conf.loglog_threshold + ')'
-        });
+            .text('-log\u2081\u2080(p-value)')
 
         var chroms_and_midpoints = (function() {
             var v = get_chrom_offsets();
@@ -779,8 +772,8 @@ $(function () {
                                   }
                                  );
         if (data.unbinned_variants[data.unbinned_variants.length - 1].pScaled >= window.vis_conf.loglog_threshold) {
-        $("#manhattan-note").append("<span>p-values smaller than 1e-" + window.vis_conf.loglog_threshold + " are shown on a log-log scale</span>");
-        $("#manhattan-note").css("display", "inline-block");
+            $("#loglog-note").append("<span>p-values smaller than 1e-" + window.vis_conf.loglog_threshold + " are shown on a log-log scale</span>");
+            $("#loglog-note").css("display", "inline-block");
         }
         })
         .fail(function(error) {

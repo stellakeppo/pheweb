@@ -343,16 +343,31 @@ $(function() {
     }
 
     if (!window.gene_symbol) return
-    $.getJSON('http://rest.ensembl.org/xrefs/symbol/human/' + window.gene_symbol + '?content-type=application/json')
+    $.getJSON('http://mygene.info/v3/query?q=' +  window.gene_symbol + '&fields=symbol%2Cname%2Centrezgene%2Censembl.gene%2CMIM%2Csummary&species=human')
         .done(function(result) {
-    	    if (result.length > 0) {
-                var url = 'http://gnomad.broadinstitute.org/gene/' + result[0].id
-                $('#gnomad-link').html(', <a href=' + url + ' target="_blank">gnomAD</a>')
-                var url = 'https://www.targetvalidation.org/target/' + result[0].id
-                $('#opentarget-link').html(', <a href=' + url + ' target="_blank">Opentarget</a>')
-    	    } else {
-                console.log(window.gene_symbol + ' not found in ensembl')
-    	    }
+            var mygene = {symbol:window.gene_symbol}
+            if (result.hits && result.hits.length > 0) {
+                mygene = result.hits[0]
+            }
+            if (mygene.MIM) {
+                $('#omim-link').html('<a target="_blank" href="https://www.omim.org/entry/' + mygene.MIM + '">OMIM</a>')
+            } else {
+                $('#omim-link').html('<a target="_blank" href="https://www.omim.org/search/?index=entry&sort=score+desc%2C+prefix_sort+desc&start=1&limit=10&search=' + mygene.symbol + '">OMIM</a>')
+            }
+            $('#gtex-link').html(', <a target="_blank" href="https://www.gtexportal.org/home/eqtls/byGene?tissueName=All&geneId=' + mygene.symbol + '">GTEx</a>')
+            if (mygene.ensembl && mygene.ensembl.gene) {
+                $('#gnomad-link').html(', <a href="http://gnomad.broadinstitute.org/gene/' + mygene.ensembl.gene + '" target="_blank">gnomAD</a>')
+                $('#opentarget-link').html(', <a href="https://www.targetvalidation.org/target/' + mygene.ensembl.gene + '" target="_blank">Opentarget</a>')
+            }
+            if (mygene.name) {
+                $('#gene-description').html(mygene.name)
+            }
+            if (mygene.entrezgene) {
+                $('#gene-summary')
+                    .append('<a href="https://www.ncbi.nlm.nih.gov/gene/' + mygene.entrezgene + '" target="_blank">NCBI</a> ')
+                    .append(mygene.summary || 'No description')
+                $('#gene-summary').css({'background-color': '#f4f4f4', 'padding': '10px'})
+            }
         })
     $('#assocloader').css('display', 'block')
     $.getJSON("/api/gene_phenos/" + window.gene_symbol)
@@ -371,7 +386,7 @@ $(function() {
 	})
     $.getJSON("/api/drugs/" + window.gene_symbol)
 	.done(function(data) {
-	    if (data.length > 0) {
+	    if (data && data.length > 0) {
 		populate_drugs_streamtable(data)
 	    } else {
 		$('#drugs-container').html('<span>No known drugs for ' + window.gene_symbol + '</span>')
@@ -380,7 +395,6 @@ $(function() {
 	})
     $.getJSON("/api/lof/" + window.gene_symbol)
 	.done(function(data) {
-	    console.log(data)
 	    if (data.length > 0) {
 		data = data.map(function(r) { return r.gene_data })
 		data.forEach(function(datum) {
@@ -406,25 +420,5 @@ $(function() {
 	    })
 	    populate_variant_streamtable(data)
 	    $('#functional-variants-container').css('display', 'block')
-	})
-
-    $.getJSON("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=gene&term=("
-	      + window.gene_symbol
-	      + "[gene])%20AND%20(Homo%20sapiens[orgn])%20AND%20alive[prop]%20NOT%20newentry[gene]&sort=weight&retmode=json")
-	.done(function(data) {
-	    if (data.esearchresult && +data.esearchresult.count > 0) {
-		var entrezId = data.esearchresult.idlist[0]
-		$.getJSON("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=gene&id="
-			  + entrezId + "&retmode=json")
-		    .done(function(data) {
-			$('#gene-description').html(data.result[entrezId].description)
-			$('#gene-summary')
-			    .append('<a href="https://www.ncbi.nlm.nih.gov/gene/' + entrezId + '" target="_blank">NCBI</a> ')
-			    .append(data.result[entrezId].summary || 'No description')
-			$('#gene-summary').css({'background-color': '#f4f4f4', 'padding': '10px'})
-		    })
-	    } else {
-		console.log(window.gene_symbol + ' not found in ncbi')
-	    }
 	})
 })

@@ -184,6 +184,8 @@ class DrugDao(DrugDB):
 
     def get_drugs(self, gene):
         r = requests.get("http://rest.ensembl.org/xrefs/symbol/human/" + gene + "?content-type=application/json")
+        if len(r.json()) == 0:
+            return None
         ensg = r.json()[0]['id']
         drugfields = ['target.gene_info.symbol',
                       'target.target_class',
@@ -671,7 +673,7 @@ class TabixAnnotationDao(AnnotationDB):
                 if split[header_i['most_severe']] in self.functional_variants:
                     for i, s in enumerate(split):
                         if (headers[i].startswith('af') or headers[i].startswith('maf') or headers[i].startswith('ac') or headers[i].startswith('info')):
-                            split[i] = float(s)
+                            split[i] = float(s) if s != 'NA' else 'NA'
                     annotations.append({'id': split[0], 'var_data': {header: split[i] for i, header in enumerate(headers)}})
         print('TABIX get_gene_functional_variant_annotations ' + str(round(10 *(time.time() - t)) / 10))
         return annotations
