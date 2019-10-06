@@ -132,30 +132,30 @@ def run():
                 varid[1]=int(varid[1])
 
                 if( smallestpos is not None and ( smallestpos[0]> chrord[varid[0]] or (varid[1]==smallestpos[1] and varid[1]<smallestpos[1]) )):
-                    # have not reached the smallest result so write NA row and keep on scrolling variants
-                    linedat.extend(["NA"] * len(supp_fields) * len(phenos))
-                else:
-                    for p in phenos:
-                        smallestpos=None
-                        resf = p["fpoint"]
+                    # have not reached the smallest result so keep on scrolling variants
+                    continue
 
-                        scroll_to_current( varid, p )
+                for p in phenos:
+                    smallestpos=None
+                    resf = p["fpoint"]
 
-                        sm_pos = p["cur_lines"][0] if len(p["cur_lines"])>0 else p["future"]
+                    scroll_to_current( varid, p )
 
-                        if( sm_pos is not None and ( smallestpos is None or chrord[sm_pos[0]] <smallestpos[0] or
-                            ( chrord[sm_pos[0]]==smallestpos[0] and sm_pos[1] < smallestpos[1] ))  ):
-                            smallestpos = ( chrord[sm_pos[0]], sm_pos[1] )
+                    sm_pos = p["cur_lines"][0] if len(p["cur_lines"])>0 else p["future"]
 
-                        match_idx = [ i for i,v in  enumerate(p["cur_lines"]) if all([ varid[j]==v[j] for j in [0,1,2,3 ] ]) ]
+                    if( sm_pos is not None and ( smallestpos is None or chrord[sm_pos[0]] <smallestpos[0] or
+                        ( chrord[sm_pos[0]]==smallestpos[0] and sm_pos[1] < smallestpos[1] ))  ):
+                        smallestpos = ( chrord[sm_pos[0]], sm_pos[1] )
 
-                        if len(match_idx)==0:
-                            ## not matching.... write blanks,
-                            linedat.extend(["NA"] * len(supp_fields))
-                        else:
-                            anymatch=True
-                            linedat.extend(p["cur_lines"][match_idx[0]][4:])
-                            del p["cur_lines"][match_idx[0]]
+                    match_idx = [ i for i,v in  enumerate(p["cur_lines"]) if all([ varid[j]==v[j] for j in [0,1,2,3 ] ]) ]
+
+                    if len(match_idx)==0:
+                        ## not matching.... write blanks,
+                        linedat.extend(["NA"] * len(supp_fields))
+                    else:
+                        anymatch=True
+                        linedat.extend(p["cur_lines"][match_idx[0]][4:])
+                        del p["cur_lines"][match_idx[0]]
                 if(not args.require_match or anymatch):
                     out.write("\t".join(linedat) + "\n")
                 linedat.clear()

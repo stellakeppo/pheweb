@@ -97,7 +97,7 @@ class Variant(JSONifiable):
         
 class PhenoResult(JSONifiable):
 
-    def __init__(self, phenocode,phenostring, category_name,pval,beta, maf_case,maf_control, n_case,n_control):
+    def __init__(self, phenocode,phenostring, category_name,pval,beta, maf_case,maf_control, n_case_fg,n_control_fg, n_case_ukb,n_control_ukb):
         self.phenocode = phenocode
         self.phenostring = phenostring
         self.pval = float(pval) if pval is not None and pval!='NA' else None
@@ -106,8 +106,10 @@ class PhenoResult(JSONifiable):
         self.maf_control = float(maf_control) if maf_control is not None and maf_control!='NA' else None
         self.matching_results = {}
         self.category_name = category_name
-        self.n_case = n_case
-        self.n_control = n_control
+        self.n_case_fg = n_case_fg
+        self.n_control_fg = n_control_fg
+        self.n_case_ukb = n_case_ukb
+        self.n_control_ukb = n_control_ukb
 
     def add_matching_result(self, resultname, result):
         self.matching_results[resultname] = result
@@ -117,7 +119,7 @@ class PhenoResult(JSONifiable):
     
     def json_rep(self):
         return {'phenocode':self.phenocode,'phenostring':self.phenostring, 'pval':self.pval, 'beta':self.beta, "maf_case":self.maf_case,
-                "maf_control":self.maf_control, 'matching_results':self.matching_results, 'category':self.category_name, "n_case":self.n_case, "n_control":self.n_control}
+                "maf_control":self.maf_control, 'matching_results':self.matching_results, 'category':self.category_name, "n_case_fg":self.n_case_fg, "n_control_fg":self.n_control_fg, "n_case_ukb":self.n_case_ukb, "n_control_ukb":self.n_control_ukb}
 
 @attr.s
 class PhenoResults( JSONifiable):
@@ -592,10 +594,10 @@ class TabixResultDao(ResultDB):
             for pheno in self.phenos:
                 pval = split[pheno[1]]
                 beta = split[pheno[1]+1]
-                maf_case = split[pheno[1]+4]
-                maf_control = split[pheno[1]+5]
-                pr = PhenoResult(pheno[0], self.pheno_map[pheno[0]]['phenostring'],self.pheno_map[pheno[0]]['category'],pval , beta, maf_case, maf_control, 
-                        self.pheno_map[pheno[0]]['num_cases'],  self.pheno_map[pheno[0]]['num_controls'] )
+                maf_case = split[pheno[1]+3]
+                maf_control = split[pheno[1]+4]
+                pr = PhenoResult(pheno[0], self.pheno_map[pheno[0]]['phenostring'],self.pheno_map[pheno[0]]['category'],pval , beta, maf_case, maf_control,
+                                 self.pheno_map[pheno[0]]['num_cases_fg'],  self.pheno_map[pheno[0]]['num_controls_fg'], self.pheno_map[pheno[0]]['num_cases_ukb'],  self.pheno_map[pheno[0]]['num_controls_ukb'] )
                 phenores.append(pr)
             result.append((v,phenores))
         return result
@@ -635,11 +637,11 @@ class TabixResultDao(ResultDB):
             for pheno in self.phenos:
                 pval = split[pheno[1]]
                 beta = split[pheno[1]+1]
-                maf_case = split[pheno[1]+4]
-                maf_control = split[pheno[1]+5]
+                maf_case = split[pheno[1]+3]
+                maf_control = split[pheno[1]+4]
                 if pval is not '' and pval != 'NA' and ( pheno[0] not in top or (float(pval)) < top[pheno[0]][1].pval ):            
                     pr = PhenoResult(pheno[0], self.pheno_map[pheno[0]]['phenostring'],self.pheno_map[pheno[0]]['category'],pval , beta, maf_case, maf_control,
-                            self.pheno_map[pheno[0]]['num_cases'],  self.pheno_map[pheno[0]]['num_controls'] )
+                                 self.pheno_map[pheno[0]]['num_cases_fg'],  self.pheno_map[pheno[0]]['num_controls_fg'], self.pheno_map[pheno[0]]['num_cases_ukb'],  self.pheno_map[pheno[0]]['num_controls_ukb'] )
                     v=  Variant( split[0].replace('X', '23'), split[1], split[2], split[3])
                     if split[4]!='':  v.add_annotation("rsids",split[4])
                     v.add_annotation('nearest_gene', split[5])
@@ -735,7 +737,7 @@ class ExternalMatrixResultDao(ExternalResultDB):
             known_range: only searches this range for matching variants. This speeds up the query if it is known that all variants reside close to each other in a contiguous block of results
             returns dictionary of dictionaries first keyed by Variant and then by phenocode
         '''
-
+        
         res = defaultdict(lambda: defaultdict( lambda: dict()))
         t = time.time()
         
@@ -1128,11 +1130,7 @@ class ElasticLofDao(LofDB):
 
 class TSVDao(TSVDB):
      def __init__(self, coding):
-          df = pd.read_csv(coding, encoding='utf8', sep='\t').fillna('NA')
-          top_i = df.groupby('variant')['pval'].idxmin
-          df['is_top'] = 0
-          df.loc[top_i, 'is_top'] = 1
-          self.coding_data = df.to_dict(orient='records')
+          self.coding_data = pd.read_csv(coding, encoding='utf8', sep='\t').fillna('NA').to_dict(orient='records')
      def get_coding(self):
           return self.coding_data
 
@@ -1240,7 +1238,7 @@ class DataFactory(object):
         return self.dao_impl["gnomad"]
 
     def get_lof_dao(self):
-        return self.dao_impl["lof"]
+        return self.dao_impl["lof"] if "lof" in self.dao_impl else None
 
     def get_result_dao(self):
         return self.dao_impl["result"]
@@ -1255,7 +1253,7 @@ class DataFactory(object):
         return self.dao_impl["drug"]
 
     def get_tsv_dao(self):
-        return self.dao_impl["tsv"]
+        return self.dao_impl["tsv"] if "tsv" in self.dao_impl else None
 
     def get_finemapping_dao(self):
         return self.dao_impl["finemapping"] if "finemapping" in self.dao_impl else None

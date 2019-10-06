@@ -754,10 +754,6 @@ $(function () {
                                       st.search($('#search')[0].value);
                                   }
                                  );
-        if (data.unbinned_variants[data.unbinned_variants.length - 1].pScaled >= window.vis_conf.loglog_threshold) {
-            $("#loglog-note").append("<span>p-values smaller than 1e-" + window.vis_conf.loglog_threshold + " are shown on a log-log scale</span>");
-            $("#loglog-note").css("display", "inline-block");
-        }
         })
         .fail(function(error) {
             $('#manhattanloader').css("display", "none")

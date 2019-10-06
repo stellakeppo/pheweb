@@ -45,10 +45,10 @@
     <span id="gnomad-link"></span>
     <span id="opentarget-link"></span>
     </p>
-    <div class='btn' style='display:inline-block; padding-left: 0px'>
-        <span class='dl-link btn-primary btn aligned' id ="genereport" role='button'> Generate gene report</span>
-        <span id="reportloader" class="loader aligned"></span>
-    </div>
+    <!-- <div class='btn' style='display:inline-block; padding-left: 0px'> -->
+    <!--     <span class='dl-link btn-primary btn aligned' id ="genereport" role='button'> Generate gene report</span> -->
+    <!--     <span id="reportloader" class="loader aligned"></span> -->
+    <!-- </div> -->
     <p id="genereport-errorbox" class="errorbox" style="display:none">error</p>
 
   </div>
@@ -63,7 +63,7 @@
 <div id="phenos_container" style="display: none;">
 <div class="row">
   <div class="col-md-10 col-lg-10 col-sm-10 col-xs-10">
-    <h3>FinnGen association results</h3>
+    <h3>FinnGen + UKBB meta association results</h3>
   </div>
 </div>
 <div class="row">
@@ -85,9 +85,8 @@
                 <th>category</th>
                 <th style="width: 6%;">OR</th>
                 <th style="width: 7%;">p-value</th>
-                <th style="width: 7%;">number of cases</th>
-                <th style="width: 9%;">UKBB</th>
-                <th style="width: 7%;">UKBB number of cases</th>
+                <th style="width: 7%;">number of cases FG</th>
+                <th style="width: 7%;">number of cases UKBB</th>
               </tr>
             </thead>
             <tbody>
@@ -124,43 +123,43 @@
   </div>
 </div>
 
-<div class="row">
-  <div class="col-md-10 col-lg-10 col-sm-10 col-xs-10">
-    <h3>Loss of function burden</h3>
-  </div>
-</div>
-<div id="lof-container" style="padding-bottom: 10px; display:none;">
-<div class="row">
-  <div class="col-xs-12 col-sm-8 col-md-6">
-    <input type="text" class="form-control" id="search-lof" placeholder="Search... &quot;coronary&quot;, &quot;nervous system&quot;, etc.">
-  </div>
-  <div class="col-xs-12 col-sm-4 col-sm-6">
-    <h5 class="pull-right"><div id="streamtable-lof-found" class="label label-primary"></div></h5>
-  </div>
-</div>
-<div class="row stream_table_row">
-  <div class="col-xs-12 drugs">
-    <table id="stream_table_lof" class="snugtable table table-striped table-bordered">
-      <thead>
-        <tr>
-          <th style="width: 40% cursor: pointer;" data-sort="phenostring:asc">phenotype</th>
-          <th style="width: 20%;">variants</th>
-          <th style="width: 6%; cursor: pointer;" data-sort="p_value:desc:number">p-value</th>
-          <th style="width: 6%; cursor: pointer;" data-sort="beta:desc:number">beta</th>
-          <th style="width: 10%;">ref/alt cases</th>
-          <th style="width: 10%;">ref/alt controls</th>
-	</tr>
-      </thead>
-      <tbody>
-      </tbody>
-    </table>
-    <div class='btn' style='padding-left: 0px'>
-      <a class='dl-link btn-primary btn' id ="export_lof" role='button'> Download table data as TSV
-      </a>
-    </div>
-  </div>
-</div>
-</div>
+<!-- <div class="row"> -->
+<!--   <div class="col-md-10 col-lg-10 col-sm-10 col-xs-10"> -->
+<!--     <h3>Loss of function burden</h3> -->
+<!--   </div> -->
+<!-- </div> -->
+<!-- <div id="lof-container" style="padding-bottom: 10px; display:none;"> -->
+<!-- <div class="row"> -->
+<!--   <div class="col-xs-12 col-sm-8 col-md-6"> -->
+<!--     <input type="text" class="form-control" id="search-lof" placeholder="Search... &quot;coronary&quot;, &quot;nervous system&quot;, etc."> -->
+<!--   </div> -->
+<!--   <div class="col-xs-12 col-sm-4 col-sm-6"> -->
+<!--     <h5 class="pull-right"><div id="streamtable-lof-found" class="label label-primary"></div></h5> -->
+<!--   </div> -->
+<!-- </div> -->
+<!-- <div class="row stream_table_row"> -->
+<!--   <div class="col-xs-12 drugs"> -->
+<!--     <table id="stream_table_lof" class="snugtable table table-striped table-bordered"> -->
+<!--       <thead> -->
+<!--         <tr> -->
+<!--           <th style="width: 40% cursor: pointer;" data-sort="phenostring:asc">phenotype</th> -->
+<!--           <th style="width: 20%;">variants</th> -->
+<!--           <th style="width: 6%; cursor: pointer;" data-sort="p_value:desc:number">p-value</th> -->
+<!--           <th style="width: 6%; cursor: pointer;" data-sort="beta:desc:number">beta</th> -->
+<!--           <th style="width: 10%;">ref/alt cases</th> -->
+<!--           <th style="width: 10%;">ref/alt controls</th> -->
+<!-- 	</tr> -->
+<!--       </thead> -->
+<!--       <tbody> -->
+<!--       </tbody> -->
+<!--     </table> -->
+<!--     <div class='btn' style='padding-left: 0px'> -->
+<!--       <a class='dl-link btn-primary btn' id ="export_lof" role='button'> Download table data as TSV -->
+<!--       </a> -->
+<!--     </div> -->
+<!--   </div> -->
+<!-- </div> -->
+<!-- </div> -->
 
 
 <div id ="functional-variants-container" style="display: none;">
@@ -179,8 +178,7 @@
           <th style="width: 5%; cursor: pointer; user-select: none;" data-sort="info:desc:number">info</th>
           <th style="width: 6%; cursor: pointer; user-select: none;" data-sort="fin_enrichment:desc:mixed">FIN enrichment</th>
           <th style="width: 7%; cursor: pointer; user-select: none;" data-sort="maf:desc:number">maf</th>
-          <th style="user-select: none;">FinnGen phenotypes p < {{ "{:.0E}".format(func_var_report_p_threshold) }}</th>
-          <th style="user-select: none;">UKBB results</th>
+          <th style="user-select: none;">FinnGen+UKBB phenotypes p < {{ "{:.0E}".format(func_var_report_p_threshold) }}</th>
 	</tr>
       </thead>
       <tbody>
@@ -249,9 +247,8 @@
     <td><%= p.pheno.category || 'Unknown' %></td>
     <td><%= _.template($('#beta-template-dir').html())({assoc: p.assoc}) + Math.exp(p.assoc.beta).toFixed(2) %></td>
     <td><%= p.assoc.pval.toExponential(1) %></td>
-    <td style="text-align: right;"><%= p.pheno.num_cases %></td>
-    <td><%= p.assoc.matching_results.ukbb ? _.template($('#beta-template-dir').html())({assoc: p.assoc.matching_results.ukbb}) + '<span>' + Number(p.assoc.matching_results.ukbb.pval).toExponential(1) + '</span>'  : 'NA' %></td>
-    <td><%= p.assoc.matching_results.ukbb ? p.assoc.matching_results.ukbb.n_cases:"NA"  %></td>
+    <td style="text-align: right;"><%= p.pheno.num_cases_fg %></td>
+    <td style="text-align: right;"><%= p.pheno.num_cases_ukb %></td>
   </tr>
   <% } else { %>
   <tr>
@@ -267,9 +264,8 @@
     <td><%= p.pheno.category || 'Unknown' %></td>
     <td><%= _.template($('#beta-template-dir').html())({assoc: p.assoc}) +  Math.exp(p.assoc.beta).toPrecision(2) %></td>
     <td><%= p.assoc.pval.toExponential(1) %></td>
-    <td style="text-align: right;"><%= p.pheno.num_cases %></td>
-    <td><%= p.assoc.matching_results.ukbb ? _.template($('#beta-template-dir').html())({assoc: p.assoc.matching_results.ukbb}) + '<span>p:' + Number(p.assoc.matching_results.ukbb.pval).toExponential(1) +'</span>' : 'NA' %></td>
-    <td><%= p.assoc.matching_results.ukbb ? p.assoc.matching_results.ukbb.n_cases:"NA"  %></td>
+    <td style="text-align: right;"><%= p.pheno.num_cases_fg %></td>
+    <td style="text-align: right;"><%= p.pheno.num_cases_ukb %></td>
   </tr>
   <% } %>
 </script>
@@ -302,14 +298,6 @@
 	    .map(function(pheno) {
             return '<tr class="gene_func_var_tab"> <tr> <td class="gene_func_var_row" width="100px"> OR ' + _.template($('#beta-template-dir').html())({assoc:pheno}) + Math.exp(pheno.beta).toPrecision(2) + '<br> p-val ' + pheno.pval.toExponential(1) +
                 ' </td> <td> <a style="color:black" href="/pheno/' + pheno.phenocode + '">' +  (pheno.phenostring!="" ? pheno.phenostring: pheno.phenocode!=""? pheno.phenocode: "NA") + ' </td> </tr>'
-	    }).join(" ") %>
-        </table>
-    </td>
-    <td><table> <%= v.significant_phenos
-	    .sort(function(pheno1, pheno2) { return pheno1.pval - pheno2.pval })
-	    .map(function(pheno) {
-            return '<tr class="gene_func_var_tab"> <tr> <td class="gene_func_var_row" width="100px">' + (pheno.matching_results.ukbb ? _.template($('#beta-template-dir').html())({assoc:pheno.matching_results.ukbb}) + '<span>p:' + Number(pheno.matching_results.ukbb.pval).toExponential(1) + '</span>':"NA" ) +
-                ' </td> </tr>'
 	    }).join(" ") %>
         </table>
     </td>

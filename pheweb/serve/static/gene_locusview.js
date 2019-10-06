@@ -147,7 +147,7 @@
         },
         "panels": [ {
             "id": "association",
-            "title": { "text":"FINNGEN", "x":55, "y":30 } ,
+            "title": { "text":"FINNGEN+UKBB", "x":55, "y":30 } ,
             "proportional_height": 0.3,
             "min_width": 400,
             "min_height": 100,

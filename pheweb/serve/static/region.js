@@ -12,8 +12,8 @@
     var data_sources = new LocusZoom.DataSources();
 
     data_sources.add("association", ["AssociationLZ", {url: localBase, params:{source:3}}]);
-    data_sources.add("conditional", ["ConditionalLZ", {url: localCondBase, params:{trait_fields: ["association:pvalue", "association:beta", "association:sebeta", "association:rsid"]}}]);
-    data_sources.add("finemapping", ["FineMappingLZ", {url: localFMBase, params:{trait_fields: ["association:pvalue", "association:beta", "association:sebeta", "association:rsid"]}}]);
+    data_sources.add("conditional", ["ConditionalLZ", {url: localCondBase, params:{trait_fields: ["association:pvalue", "association:beta", "association:rsid"]}}]);
+    data_sources.add("finemapping", ["FineMappingLZ", {url: localFMBase, params:{trait_fields: ["association:pvalue", "association:beta", "association:rsid"]}}]);
     data_sources.add("gene", ["GeneLZ", {url:remoteBase + "annotation/genes/", params:{source:1}}])
     data_sources.add("constraint", ["GeneConstraintLZ", { url: "http://exac.broadinstitute.org/api/constraint" }])
     // clinvar needs to be added after gene because genes within locuszoom data chain are used for fetching
@@ -198,13 +198,13 @@
 		this.parent.setDimensions();
 		this.parent.panel_ids_by_y_index.forEach(function(id) {
 		    if (id == 'clinvar') {// || id == 'genes') {
-			this.parent.panels[id].layout.proportional_height = 0.02
+		    	this.parent.panels[id].layout.proportional_height = 0.04
 		    } else if (id != 'genes') {
-			if (this.parent.panel_ids_by_y_index.length > 4) {
-			    this.parent.panels[id].layout.proportional_height = 0.1
-			} else {
-			    this.parent.panels[id].layout.proportional_height = 0.15
-			}
+		    	if (this.parent.panel_ids_by_y_index.length > 4) {
+		    	    this.parent.panels[id].layout.proportional_height = 0.1
+		    	} else {
+		    	    this.parent.panels[id].layout.proportional_height = 0.15
+		    	}
 		    }
 		}.bind(this));
 		// after all have been rendered, scale gene panel to height

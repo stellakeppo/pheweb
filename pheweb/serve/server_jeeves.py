@@ -112,11 +112,11 @@ class ServerJeeves(object):
         print("gnomad variant annos took {} seconds".format(time.time()-starttime))
         gd = { g['variant']:g['var_data'] for g in gnomad}
         starttime = time.time()
-        ukbbs = self.ukbb_matrixdao.get_multiphenoresults(varpheno, known_range=(chrom,start,end))
-        print("UKB fetching for {} variants took {}".format( len( list(varpheno.keys()) ),time.time()-starttime) )
+        #ukbbs = self.ukbb_matrixdao.get_multiphenoresults(varpheno, known_range=(chrom,start,end))
+        #print("UKB fetching for {} variants took {}".format( len( list(varpheno.keys()) ),time.time()-starttime) )
         for pheno in results:
-            if pheno.variant in ukbbs and pheno.assoc.phenocode in ukbbs[pheno.variant]:
-                pheno.assoc.add_matching_result('ukbb', ukbbs[pheno.variant][pheno.assoc.phenocode])
+            #if pheno.variant in ukbbs and pheno.assoc.phenocode in ukbbs[pheno.variant]:
+            #    pheno.assoc.add_matching_result('ukbb', ukbbs[pheno.variant][pheno.assoc.phenocode])
 
             if pheno.variant in gd:
                 pheno.variant.add_annotation('gnomad', gd[pheno.variant])

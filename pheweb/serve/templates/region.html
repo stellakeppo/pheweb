@@ -31,15 +31,18 @@
 <div class="row">
   <div class="col-xs-12">
     <h1 style="margin-top:0">{% include "region/h1.html" %}</h1>
-    <p><a href="https://risteys.finngen.fi/phenocode/{{ pheno.phenocode.replace('_EXALLC', '').replace('_EXMORE', '') }}" target="_blank">RISTEYS</a></p>
+    <p><a href="https://risteys.finngen.fi/phenocode/{{ pheno.phenocode.replace('_EXALLC', '').replace('_EXMORE', '').replace('_meta', '') }}" target="_blank">RISTEYS</a></p>
   </div>
 </div>
 <div class="row">
     <div class="pheno-info col-xs-12">
-        {% if 'num_cases' in pheno %}
-          <p style="margin-bottom: 0"><b>{{ pheno.num_cases }}</b> cases, <b>{{ pheno.num_controls }}</b> controls</p>
+        {% if 'num_cases_fg' in pheno %}
+          <p style="margin-bottom: 0">FINNGEN:<b> {{ pheno.num_cases_fg }}</b> cases, <b>{{ pheno.num_controls_fg }}</b> controls</p>
         {% elif 'num_samples' in pheno %}
-          <p style="margin-bottom: 0"><b>{{ pheno.num_samples }}</b> samples</p>
+          <p><b>{{ pheno.num_samples }}</b> samples</p>
+        {% endif %}
+        {% if 'num_cases_ukb' in pheno %}
+          <p style="margin-bottom: 0">UKBB:<b> {{ pheno.num_cases_ukb }}</b> cases, <b>{{ pheno.num_controls_ukb }}</b> controls</p>
         {% endif %}
         {% if pheno.category %}
           <p style="margin-bottom: 0">{{ pheno.category}}</p>

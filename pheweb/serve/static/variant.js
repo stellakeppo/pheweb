@@ -244,13 +244,13 @@ LocusZoom.TransformationFunctions.set("percent", function(x) {
     if (num_phenos_with_maf === mafs.length) {
         var range = d3.extent(mafs);
         $(function() {
-            $('#maf-range').html('<p style="text-decoration: underline;" title="' + _.template($('#af-tooltip-template').html())({v:window.variant}) + '" data-toggle="tooltip">AF ' + (window.variant.annot && window.variant.annot.AF && window.variant.annot.AF.toExponential(1)) + ' (ranges from ' + range[0].toExponential(1) + ' to ' + range[1].toExponential(1) + ' across all phenotypes)</p>');
+            $('#maf-range').html('<p style="text-decoration: underline;" title="' + _.template($('#af-tooltip-template').html())({v:window.variant}) + '" data-toggle="tooltip">FinnGen AF ' + (window.variant.annot && window.variant.annot.AF && window.variant.annot.AF.toExponential(1)) + ' (ranges from ' + range[0].toExponential(1) + ' to ' + range[1].toExponential(1) + ' across all phenotypes)</p>');
             $('#maf-range p').css('margin-bottom', '0');
         });
     } else if (num_phenos_with_maf > 0) {
         var range = d3.extent(mafs);
         $(function() {
-            $('#maf-range').html('<p style="text-decoration: underline;" title="' + _.template($('#af-tooltip-template').html())({v:window.variant}) + '" data-toggle="tooltip">AF ' + (window.variant.annot && window.variant.annot.AF && window.variant.annot.AF.toExponential(1)) + ' (ranges from ' + range[0].toExponential(1) + ' to ' + range[1].toExponential(1) + ') for phenotypes where it is defined</p>');
+            $('#maf-range').html('<p style="text-decoration: underline;" title="' + _.template($('#af-tooltip-template').html())({v:window.variant}) + '" data-toggle="tooltip">FinnGen AF ' + (window.variant.annot && window.variant.annot.AF && window.variant.annot.AF.toExponential(1)) + ' (ranges from ' + range[0].toExponential(1) + ' to ' + range[1].toExponential(1) + ') for phenotypes where it is defined</p>');
             $('#maf-range p').css('margin-bottom', '0');
         });
     }
@@ -295,7 +295,7 @@ LocusZoom.TransformationFunctions.set("percent", function(x) {
     });
     var range = d3.extent(infos);
     $(function() {
-            $('#info-range').html('<p style="text-decoration: underline;" title="' + _.template($('#info-tooltip-template').html())({v:window.variant}) + '" data-toggle="tooltip">INFO ' + (window.variant.annot && window.variant.annot.INFO && window.variant.annot.INFO.toFixed(3)) + ' (ranges in genotyping batches from ' + range[0].toFixed(3) + ' to ' + range[1].toFixed(3) + ')</p>');
+            $('#info-range').html('<p style="text-decoration: underline;" title="' + _.template($('#info-tooltip-template').html())({v:window.variant}) + '" data-toggle="tooltip">FinnGen INFO ' + (window.variant.annot && window.variant.annot.INFO && window.variant.annot.INFO.toFixed(3)) + ' (ranges in genotyping batches from ' + range[0].toFixed(3) + ' to ' + range[1].toFixed(3) + ')</p>');
         $('#info-range p').css('margin-bottom', '0');
     });
     
@@ -313,11 +313,12 @@ LocusZoom.TransformationFunctions.set("percent", function(x) {
 (function() {
     if (window.variant.annot) {
 	$(function() {
-	    $('#hom').html('<p>Number of alt homozygotes: ' + +(window.variant.annot.AC_Hom)/2 + '<p>')
+	    $('#hom').html('<p>Number of alt homozygotes in FinnGen: ' + +(window.variant.annot.AC_Hom)/2 + '<p>')
             $('#hom p').css('margin-bottom', '0');
 	})
     }
 })();
+
 
 // Check Clinvar and render link.
 (function() {
@@ -439,14 +440,6 @@ $(function () {
     $("#export").click( function (event) {
     exportTableToCSV.apply(this, [$('#stream_table'),window.variant.id.replace(/ |,|/g,"") + "_phenotype_associations.tsv",window.var_top_pheno_export_fields])
   });
-})
-
-$(function () {
-    var maxLogLogP = d3.max(window.results, function(d) { return d.pScaled });
-    if (maxLogLogP >= window.vis_conf.loglog_threshold) {
-	$("#loglog-note").append("<span>p-values smaller than 1e-" + window.vis_conf.loglog_threshold + " are shown on a log-log scale</span>");
-	$("#loglog-note").css("display", "inline-block");
-    }
 })
 
 $(function () {

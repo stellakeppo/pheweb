@@ -164,7 +164,7 @@ def api_pheno(phenocode):
 @app.route('/api/gene_phenos/<gene>')
 @check_auth
 def api_gene_phenos(gene):
-        return jsonify( jeeves.gene_phenos(gene) )
+    return jsonify( jeeves.gene_phenos(gene) )
 
 @app.route('/api/gene_functional_variants/<gene>')
 @check_auth
@@ -178,6 +178,8 @@ def api_gene_functional_variants(gene):
 @app.route('/api/lof')
 @check_auth
 def api_lof():
+    if lof_dao is None:
+        die("LoF not available")
     lofs = lof_dao.get_all_lofs(conf.lof_threshold)
     for i in range( len(lofs)-1,-1,-1):
         ## lof data is retrieved externally so it can be out of sync with phenotypes that we want to show
