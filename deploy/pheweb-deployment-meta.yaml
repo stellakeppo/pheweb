@@ -29,7 +29,7 @@ spec:
             topologyKey: kubernetes.io/hostname
       containers:
       - name: pheweb-container
-        image: gcr.io/phewas-development/pheweb_meta:0.3
+        image: gcr.io/phewas-development/pheweb_meta:0.41
         ports:
         - containerPort: 8080
         volumeMounts:
