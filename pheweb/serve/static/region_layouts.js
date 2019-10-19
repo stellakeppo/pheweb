@@ -145,8 +145,8 @@ window.panel_layouts.association = {
 			    "scale_function": "categorical_bin",
 			    "field": "association:most_severe",
 			    "parameters": {
-				"categories": ["frameshift variant", "inframe deletion", "inframe insertion", "splice acceptor variant", "splice donor variant", "start lost", "stop gained", "stop lost", "TFBS ablation", "missense variant"],
-				"values": ["triangle-up", "triangle-down", "triangle-down", "triangle-up", "triangle-up", "triangle-down", "triangle-down", "triangle-down", "triangle-down", "square"],
+				"categories": ["frameshift variant", "splice donor variant", "inframe deletion", "inframe insertion", "splice acceptor variant", "splice donor variant", "start lost", "stop gained", "stop lost", "TFBS ablation", "missense variant"],
+				"values": ["triangle-up", "triangle-up", "triangle-down", "triangle-down", "triangle-up", "triangle-up", "triangle-down", "triangle-down", "triangle-down", "triangle-down", "square"],
 				"null_value": "circle"
 			    }
 			},
@@ -163,8 +163,8 @@ window.panel_layouts.association = {
 			    "scale_function": "categorical_bin",
 			    "field": "association:most_severe",
 			    "parameters": {
-				"categories": ["frameshift variant", "inframe deletion", "inframe insertion", "splice acceptor variant", "splice donor variant", "start lost", "stop gained", "stop lost", "TFBS ablation", "missense variant"],
-				"values": [80, 80, 80, 80, 80, 80, 80, 80, 80, 80],
+				"categories": ["frameshift variant", "splice donor variant", "inframe deletion", "inframe insertion", "splice acceptor variant", "splice donor variant", "start lost", "stop gained", "stop lost", "TFBS ablation", "missense variant"],
+				"values": [80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80],
 				"null_value": 40
 			    }
 			},
@@ -185,31 +185,7 @@ window.panel_layouts.association = {
 			}, "#B8B8B8"],
 			fill_opacity: 0.7,
 			"legend": [{
-			    "shape": "triangle-up",
-			    "color": "#B8B8B8",
-			    "size": 80,
-			    "label": "frameshift, splice acceptor, splice donor",
-			    "class": "lz-data_layer-scatter"
-			}, {
-			    "shape": "square",
-			    "color": "#B8B8B8",
-			    "size": 80,
-			    "label": "missense",
-			    "class": "lz-data_layer-scatter"
-			}, {
-			    "shape": "triangle-down",
-			    "color": "#B8B8B8",
-			    "size": 80,
-			    "label": "inframe indel, start lost, stop lost, stop gained",
-			    "class": "lz-data_layer-scatter"
-			}, {
-			    "shape": "circle",
-			    "color": "#B8B8B8",
-			    "size": 40,
-			    "label": "other",
-			    "class": "lz-data_layer-scatter"
-			}, {
-			    "shape": "circle",
+			    "shape": "diamond",
 			    "color": "#9632b8",
 			    "size": 40,
 			    "label": "LD Ref Var",
@@ -251,6 +227,7 @@ window.panel_layouts.association = {
 			    "label": "no r² data",
 			    "class": "lz-data_layer-scatter"
 			}],
+
 			fields: ["association:id", "association:chr", "association:position", "association:ref", "association:alt", "association:pvalue", "association:pvalue|neglog10_or_100", "association:beta", "association:sebeta", "association:rsid", "association:maf", "association:maf_cases", "association:maf_controls", "association:most_severe", "association:fin_enrichment", "association:INFO", "ld:state", "ld:isrefvar"],
 			// ldrefvar can only be chosen if "pvalue|neglog10_or_100" is present.  I forget why.
 			id_field: "association:id",
@@ -310,11 +287,11 @@ window.panel_layouts.conditional = {
     },
     "inner_border": "rgb(210, 210, 210)",
     "dashboard": {
-        "components": [{
-	    "type": "toggle_legend",
-	    "position": "right",
-	    "color": "green"
-        }]
+        // "components": [{
+	//     "type": "toggle_legend",
+	//     "position": "right",
+	//     "color": "green"
+        // }]
     },
     "axes": {
         "x": {
@@ -371,8 +348,8 @@ window.panel_layouts.conditional = {
 	    "scale_function": "categorical_bin",
 	    "field": "conditional:most_severe",
 	    "parameters": {
-		"categories": ["frameshift variant", "inframe deletion", "inframe insertion", "splice acceptor variant", "splice donor variant", "start lost", "stop gained", "stop lost", "TFBS ablation", "missense variant"],
-		"values": ["triangle-up", "triangle-down", "triangle-down", "triangle-up", "triangle-up", "triangle-down", "triangle-down", "triangle-down", "triangle-down", "square"],
+		"categories": ["frameshift variant", "splice donor variant", "inframe deletion", "inframe insertion", "splice acceptor variant", "splice donor variant", "start lost", "stop gained", "stop lost", "TFBS ablation", "missense variant"],
+		"values": ["triangle-up", "triangle-up", "triangle-down", "triangle-down", "triangle-up", "triangle-up", "triangle-down", "triangle-down", "triangle-down", "triangle-down", "square"],
 		"null_value": "circle"
 	    }
 	},
@@ -389,8 +366,8 @@ window.panel_layouts.conditional = {
 	    "scale_function": "categorical_bin",
 	    "field": "conditional:most_severe",
 	    "parameters": {
-		"categories": ["frameshift variant", "inframe deletion", "inframe insertion", "splice acceptor variant", "splice donor variant", "start lost", "stop gained", "stop lost", "TFBS ablation", "missense variant"],
-		"values": [80, 80, 80, 80, 80, 80, 80, 80, 80, 80],
+		"categories": ["frameshift variant", "splice donor variant", "inframe deletion", "inframe insertion", "splice acceptor variant", "splice donor variant", "start lost", "stop gained", "stop lost", "TFBS ablation", "missense variant"],
+		"values": [80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80],
 		"null_value": 40
 	    }
 	},
@@ -411,30 +388,48 @@ window.panel_layouts.conditional = {
         }, "#B8B8B8"],
         fill_opacity: 0.7,
         "legend": [{
-	    "shape": "triangle-up",
-	    "color": "#B8B8B8",
-	    "size": 80,
-	    "label": "frameshift, splice acceptor, splice donor",
+	    "shape": "diamond",
+	    "color": "#9632b8",
+	    "size": 40,
+	    "label": "LD Ref Var",
 	    "class": "lz-data_layer-scatter"
-	}, {
-	    "shape": "square",
-	    "color": "#B8B8B8",
-	    "size": 80,
-	    "label": "missense",
+        }, {
+	    "shape": "circle",
+	    "color": "#d43f3a",
+	    "size": 40,
+	    "label": "1.0 > r² ≥ 0.8",
 	    "class": "lz-data_layer-scatter"
-	}, {
-	    "shape": "triangle-down",
-	    "color": "#B8B8B8",
-	    "size": 80,
-	    "label": "inframe indel, start lost, stop lost, stop gained",
+        }, {
+	    "shape": "circle",
+	    "color": "#eea236",
+	    "size": 40,
+	    "label": "0.8 > r² ≥ 0.6",
 	    "class": "lz-data_layer-scatter"
-	}, {
+        }, {
+	    "shape": "circle",
+	    "color": "#5cb85c",
+	    "size": 40,
+	    "label": "0.6 > r² ≥ 0.4",
+	    "class": "lz-data_layer-scatter"
+        }, {
+	    "shape": "circle",
+	    "color": "#46b8da",
+	    "size": 40,
+	    "label": "0.4 > r² ≥ 0.2",
+	    "class": "lz-data_layer-scatter"
+        }, {
+	    "shape": "circle",
+	    "color": "#357ebd",
+	    "size": 40,
+	    "label": "0.2 > r² ≥ 0.0",
+	    "class": "lz-data_layer-scatter"
+        }, {
 	    "shape": "circle",
 	    "color": "#B8B8B8",
 	    "size": 40,
-	    "label": "other",
+	    "label": "no r² data",
 	    "class": "lz-data_layer-scatter"
-	}],
+        }],
 	fields: ["association:pvalue", "association:beta", "association:sebeta", "association:rsid", "conditional:id", "conditional:chr", "conditional:position", "conditional:ref", "conditional:alt", "conditional:pvalue", "conditional:pvalue|neglog10_or_100", "conditional:beta", "conditional:sebeta", "conditional:AF", "conditional:INFO", "conditional:most_severe", "conditional:fin_enrichment"],
         id_field: "conditional:id",
         behaviors: {
@@ -552,8 +547,8 @@ window.panel_layouts.finemapping = {
 	    "scale_function": "categorical_bin",
 	    "field": "finemapping:most_severe",
 	    "parameters": {
-		"categories": ["frameshift variant", "inframe deletion", "inframe insertion", "splice acceptor variant", "splice donor variant", "start lost", "stop gained", "stop lost", "TFBS ablation", "missense variant"],
-		"values": ["triangle-up", "triangle-down", "triangle-down", "triangle-up", "triangle-up", "triangle-down", "triangle-down", "triangle-down", "triangle-down", "square"],
+		"categories": ["frameshift variant", "splice donor variant", "inframe deletion", "inframe insertion", "splice acceptor variant", "splice donor variant", "start lost", "stop gained", "stop lost", "TFBS ablation", "missense variant"],
+		"values": ["triangle-up", "triangle-up", "triangle-down", "triangle-down", "triangle-up", "triangle-up", "triangle-down", "triangle-down", "triangle-down", "triangle-down", "square"],
 		"null_value": "circle"
 	    }
 	},
@@ -570,8 +565,8 @@ window.panel_layouts.finemapping = {
 	    "scale_function": "categorical_bin",
 	    "field": "finemapping:most_severe",
 	    "parameters": {
-		"categories": ["frameshift variant", "inframe deletion", "inframe insertion", "splice acceptor variant", "splice donor variant", "start lost", "stop gained", "stop lost", "TFBS ablation", "missense variant"],
-		"values": [80, 80, 80, 80, 80, 80, 80, 80, 80, 80],
+		"categories": ["frameshift variant", "splice donor variant", "inframe deletion", "inframe insertion", "splice acceptor variant", "splice donor variant", "start lost", "stop gained", "stop lost", "TFBS ablation", "missense variant"],
+		"values": [80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80],
 		"null_value": 40
 	    }
 	},
@@ -586,30 +581,6 @@ window.panel_layouts.finemapping = {
         }, "#B8B8B8"],
         fill_opacity: 0.7,
         "legend": [{
-	    "shape": "triangle-up",
-	    "color": "#B8B8B8",
-	    "size": 80,
-	    "label": "frameshift, splice acceptor, splice donor",
-	    "class": "lz-data_layer-scatter"
-	}, {
-	    "shape": "square",
-	    "color": "#B8B8B8",
-	    "size": 80,
-	    "label": "missense",
-	    "class": "lz-data_layer-scatter"
-	}, {
-	    "shape": "triangle-down",
-	    "color": "#B8B8B8",
-	    "size": 80,
-	    "label": "inframe indel, start lost, stop lost, stop gained",
-	    "class": "lz-data_layer-scatter"
-	}, {
-	    "shape": "circle",
-	    "color": "#B8B8B8",
-	    "size": 40,
-	    "label": "other",
-	    "class": "lz-data_layer-scatter"
-	}, {
 	    "shape": "circle",
 	    "color": "#66165d",
 	    "size": 40,

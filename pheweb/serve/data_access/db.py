@@ -1128,11 +1128,7 @@ class ElasticLofDao(LofDB):
 
 class TSVDao(TSVDB):
      def __init__(self, coding):
-          df = pd.read_csv(coding, encoding='utf8', sep='\t').fillna('NA')
-          top_i = df.groupby('variant')['pval'].idxmin
-          df['is_top'] = 0
-          df.loc[top_i, 'is_top'] = 1
-          self.coding_data = df.to_dict(orient='records')
+          self.coding_data = pd.read_csv(coding, encoding='utf8', sep='\t').fillna('NA').to_dict(orient='records')
      def get_coding(self):
           return self.coding_data
 

@@ -200,11 +200,7 @@
 		    if (id == 'clinvar') {// || id == 'genes') {
 			this.parent.panels[id].layout.proportional_height = 0.02
 		    } else if (id != 'genes') {
-			if (this.parent.panel_ids_by_y_index.length > 4) {
-			    this.parent.panels[id].layout.proportional_height = 0.1
-			} else {
-			    this.parent.panels[id].layout.proportional_height = 0.15
-			}
+			this.parent.panels[id].layout.proportional_height = 0.1
 		    }
 		}.bind(this));
 		// after all have been rendered, scale gene panel to height
