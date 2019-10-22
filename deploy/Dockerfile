@@ -14,4 +14,4 @@ RUN apt-get install python3-pip libffi-dev libz-dev libssl-dev libbz2-dev liblzm
     pip3 install /pheweb
 
 EXPOSE 8080
-CMD cloud_sql_proxy -instances=phewas-development:europe-west1:pheweb=tcp:3306 -credential_file=/mnt/nfs/pheweb/phewas.sql.credentials.json & cd /mnt/nfs/pheweb/r3 && pheweb serve --port 8080
+CMD cloud_sql_proxy -instances=phewas-development:europe-west1:pheweb=tcp:3306 -credential_file=/mnt/nfs/pheweb/phewas.sql.credentials.json & cd /mnt/nfs/pheweb/r2 && pheweb serve --port 8080

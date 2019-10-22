@@ -24,7 +24,7 @@ class _Get_Pheno_Region:
         return dataframe
 
     @staticmethod
-    def get_pheno_region(phenocode, chrom, pos_start, pos_end, p_threshold=1.1):
+    def get_pheno_region(phenocode, chrom, pos_start, pos_end):
         variants = []
         with IndexedVariantFileReader(phenocode) as reader:
             for v in reader.get_region(chrom, pos_start, pos_end+1):
@@ -35,8 +35,7 @@ class _Get_Pheno_Region:
                 _Get_Pheno_Region._rename(v, 'pos', 'position')
                 _Get_Pheno_Region._rename(v, 'rsids', 'rsid')
                 _Get_Pheno_Region._rename(v, 'pval', 'pvalue')
-                if v['pvalue'] < p_threshold:
-                    variants.append(v)
+                variants.append(v)
 
         df = _Get_Pheno_Region._dataframify(variants)
 

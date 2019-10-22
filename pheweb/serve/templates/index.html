@@ -23,8 +23,8 @@
   datum.variants = datum.variants.split(',').map(function (variant) {
       return variant.replace('chr', '').replace('_', ':').replace(/_/g, '-')
   })
-  datum.ref_alt_cases = datum.ref_count_cases.toFixed(1) + '/' + datum.alt_count_cases.toFixed(1)
-  datum.ref_alt_ctrls = datum.ref_count_ctrls.toFixed(1) + '/' + datum.alt_count_ctrls.toFixed(1)
+  datum.ref_alt_cases = datum.ref_count_cases + '/' + datum.alt_count_cases
+  datum.ref_alt_ctrls = datum.ref_count_ctrls + '/' + datum.alt_count_ctrls
   })
       populate_lof_streamtable(data);
   })
@@ -80,7 +80,7 @@
           <li class="nav-item">
               <a class="nav-link" id="phenotypes-tab" data-toggle="tab" href="#phenotypes" role="tab" aria-controls="phenotypes" aria-selected="false">Phenotype list</a>
           </li>
-         <li class="nav-item">
+          <li class="nav-item">
             <a class="nav-link" id="lof-tab" data-toggle="tab" href="#lof" role="tab" aria-controls="lof" aria-selected="false">LoF burden</a>
           </li>
         </ul>
@@ -112,7 +112,6 @@
           <thead>
             <tr>
               <th style="cursor: pointer;" data-sort="phenostring:asc">phenotype</th>
-              <th style="cursor: pointer;" data-sort="phenostring:asc">Risteys</th>
               <th style="cursor: pointer;" data-sort="category:asc">category</th>
               <th style="cursor: pointer;" data-sort="num_cases:desc:number">number of cases</th>
               <th style="cursor: pointer;" data-sort="num_controls:desc:number">number of controls</th>
@@ -150,7 +149,6 @@
 <script type="text/template" id="phenolist-streamtable-template">
     <tr>
         <td style="width:45%;"><a style="color:black" href="/pheno/<%= p.phenocode %>"><%= p.phenostring %></a></td>
-        <td style="width:6%;"><a style="color:black" href="https://risteys.finngen.fi/phenocode/<%= p.phenocode.replace('_EXALLC', '').replace('_EXMORE', '') %>">link</a></td>
         <td style="width:25%;"><%= p.category %></td>
         <td style="width:6%; text-align: right;"><%= p.num_cases %></td>
         <td style="width:6%; text-align: right;"><%= p.num_controls %></td>
@@ -169,7 +167,7 @@
 	      }).join(', ') %>
         </td>
         <td style="width:8%; text-align: right;"><%= r.p_value == 0 ? 'N/A' : r.p_value.toExponential(1) %></td>
-        <td style="width:6%; text-align: right;"><%= (+r.beta).toFixed(3) %></td>
+        <td style="width:6%; text-align: right;"><%= r.beta %></td>
         <td style="width:6%; text-align: right;"><%= r.ref_alt_cases %></td>
         <td style="width:6%; text-align: right;"><%= r.ref_alt_ctrls %></td>
     </tr>

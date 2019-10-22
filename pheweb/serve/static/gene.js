@@ -3,7 +3,6 @@
 function populate_variant_streamtable(data) {
 
     // data = _.sortBy(data, _.property('pval'));
-    //
     var template = _.template($('#streamtable-functional-variants-template').html());
     var view = function(v) {
         return template({v: v});
@@ -48,6 +47,7 @@ function populate_variant_streamtable(data) {
     $("<style type='text/css'> .functional-pagination { display: None }</style>").appendTo("head");
     options.pagination.next_text = "";
     options.pagination.prev_text = "";
+
     $('#stream_table_functional_variants').stream_table(options, data);
 
     if (window.stream_table_sortingFunc) {
@@ -133,7 +133,7 @@ function populate_streamtable(data) {
 	    item.pheno.phenocode,
 	    item.pheno.phenostring,
 	    item.pheno.category,
-	    item.variant.rsids
+	    item.assoc.rsid
 	].join(' ')
     }
     var callbacks = {
@@ -173,6 +173,7 @@ function populate_streamtable(data) {
         },
 	fields: fields
     }
+
     $('#stream_table').stream_table(options, data);
     if (window.stream_table_sortingFunc) {
 	$('#stream_table').data('st')._sortingFunc = window.stream_table_sortingFunc
@@ -193,7 +194,7 @@ function variant_id_to_pheweb_format(variant) {
 
 
 $(function () {
-    $("#export").click( function (event) {
+  $("#export").click( function (event) {
     exportTableToCSV.apply(this, [$('#stream_table'),window.gene_symbol + "_top_associations.tsv",window.gene_pheno_export_fields])
   });
 })
@@ -218,26 +219,20 @@ $(function () {
       var colDelim = '\t'
       var rowDelim = '\r\n'
 
-      var csv = ["var","rsid","var.annot.INFO","consequence","gnomad.AF_fin","gnomad.AF_nfe",
+      var csv = ["var","rsid","info","consequence","gnomad.AF_FIN","gnomad.AF_NFE",
                  "pheno","num_cases","num_controls",
                     "maf_case","maf_control","OR","pval"].join(colDelim) + rowDelim
 
       sTableData.forEach( function(variant) {
-      	var af_fin ="NA"
-		var af_nfe="NA"
-		if( _.has(variant.var,'gnomad') ) {
-			af_fin=variant.var.gnomad.AF_fin
-			af_nfe=variant.var.gnomad.AF_nfe
-		} 
-	  	if (variant.significant_phenos.length === 0) {
-	    	csv += [variant.var.id, variant.var.rsids, variant.var.annot.INFO, variant.var.annot.most_severe,
-		      af_fin, af_nfe,
+	  if (variant.significant_phenos.length === 0) {
+	      csv += [variant.id, variant.rsids, variant.info, variant.most_severe,
+		      variant.gnomad.AF_FIN, variant.gnomad.AF_NFE,
 		      '', '', '', '', '', '', '', ''].join( colDelim ) + rowDelim
-	  	} else {
-			variant.significant_phenos.forEach( function(assoc, idx) {
-		  csv += [variant.var.id, variant.var.rsids, variant.var.annot.INFO, variant.var.annot.most_severe, af_fin, af_nfe,
-			  assoc.phenostring, assoc.n_case, assoc.n_control, assoc.maf_case,
-			  assoc.maf_control,  Math.exp( assoc.beta ), assoc.pval.toExponential()].join( colDelim ) + rowDelim
+	  } else {
+              variant.significant_phenos.forEach( function(assoc, idx) {
+		  csv += [variant.id, variant.rsids, variant.info, variant.most_severe, variant.gnomad.AF_FIN, variant.gnomad.AF_NFE,
+			  assoc.pheno.phenostring, assoc.pheno.num_cases, assoc.pheno.num_controls, assoc.assoc.maf, assoc.assoc.maf_case,
+			  assoc.assoc.maf_control,  Math.exp( assoc.assoc.beta ), assoc.assoc.pval.toExponential()].join( colDelim ) + rowDelim
               } )
 	  }
       } )
@@ -320,13 +315,30 @@ $(function() {
 	var obj = variant.gnomad ? variant : variant.assoc ? variant.assoc : {}
 	if (!obj.gnomad) {
             variant.fin_enrichment = 'No data in Gnomad'
-	} else if (+obj.gnomad.AF_fin === 0) {
-	    variant.fin_enrichment = 'No FIN in Gnomad'
-	} else if (+obj.gnomad['AC_nfe_nwe'] + +obj.gnomad['AC_nfe_onf'] + +obj.gnomad['AC_nfe_seu'] == 0) {
-	    variant.fin_enrichment = 'No NFEE in Gnomad'
 	} else {
-	    variant.fin_enrichment = +obj.gnomad['AC_fin'] / +obj.gnomad['AN_fin'] /
-		( (+obj.gnomad['AC_nfe_nwe'] + +obj.gnomad['AC_nfe_onf'] + +obj.gnomad['AC_nfe_seu']) / (+obj.gnomad['AN_nfe_nwe'] + +obj.gnomad['AN_nfe_onf'] + +obj.gnomad['AN_nfe_seu']) )
+            if (obj.gnomad.POPMAX === 'FIN') {
+		var afs = Object.keys(obj.gnomad)
+		    .filter(function(key) {
+			return key.startsWith('AF_') && key !== 'AF_OTH'
+		    })
+		    .map(function(key) {
+			return {key: key, value: obj.gnomad[key]}
+		    })
+		    .sort(function(a, b) {
+			return a.value - b.value
+		    })
+		if (+afs[afs.length - 3].value === 0) {
+		    variant.fin_enrichment = 'Only FIN in Gnomad'
+		} else {
+		    variant.fin_enrichment = +obj.gnomad.AF_FIN / +afs[afs.length - 3].value
+		    variant.fin_enrichment_versus = afs[afs.length - 3].key.replace('AF_', '')
+		}
+            } else if (obj.gnomad.AF_FIN === 0) {
+		variant.fin_enrichment = 'No FIN in Gnomad'
+	    } else {
+		variant.fin_enrichment = +obj.gnomad.AF_FIN / +obj.gnomad.AF_POPMAX
+		variant.fin_enrichment_versus = obj.gnomad.POPMAX
+            }
 	}
     }
 
@@ -361,7 +373,7 @@ $(function() {
     $.getJSON("/api/gene_phenos/" + window.gene_symbol)
 	.done(function(data) {
 	    data.forEach(function(variant) {
-		gnomadize(variant.variant)
+		gnomadize(variant)
 	    })
 	    populate_streamtable(data);
 	    $('#phenos_container').css('display', 'block')
@@ -388,7 +400,7 @@ $(function() {
 		data.forEach(function(datum) {
 		    datum.variants = datum.variants.split(',').map(function (variant) {
 			    return variant.replace('chr', '').replace('_', ':').replace(/_/g, '-')
-		    }).join(',')
+		    })
 		    datum.ref_alt_cases = datum.ref_count_cases + '/' + datum.alt_count_cases
 		    datum.ref_alt_ctrls = datum.ref_count_ctrls + '/' + datum.alt_count_ctrls
 		})
@@ -400,14 +412,13 @@ $(function() {
 	})
     $.getJSON("/api/gene_functional_variants/" + window.gene_symbol + "?p=" + window.func_var_report_p_threshold )
 	.done(function(data) {
-	    data.forEach(function(variant){
-		variant.most_severe = variant.var.annot.most_severe.replace(/_/g, ' ').replace(' variant', '')
-		variant.info = variant.var.annot.INFO
-		variant.maf = variant.var.annot.AF < 0.5 ? variant.var.annot.af : 1 - variant.var.annot.AF
-		gnomadize(variant.var)
+	    data.forEach(function(variant) {
+		variant.most_severe = variant.var_data.most_severe.replace(/_/g, ' ').replace(' variant', '')
+		variant.info = variant.var_data.info
+		variant.maf = variant.var_data.af < 0.5 ? variant.var_data.af : 1 - variant.var_data.af
+		gnomadize(variant)
 	    })
 	    populate_variant_streamtable(data)
 	    $('#functional-variants-container').css('display', 'block')
 	})
-
 })

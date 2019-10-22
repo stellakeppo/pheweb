@@ -74,12 +74,11 @@
 {% block contained %}
 <div class="row">
     <div class="col-xs-12">
-        <h1 style="margin-top:0">{{ pheno.phenostring }}</h1>
+        <h1 style="margin-top:0">{% include "pheno/h1.html" %}</h1>
     </div>
 </div>
 <div class="row">
-  <div class="pheno-info col-xs-12">
-    <p><a href="https://risteys.finngen.fi/phenocode/{{ pheno.phenocode.replace('_EXALLC', '').replace('_EXMORE', '') }}" target="_blank">RISTEYS</a></p>
+    <div class="pheno-info col-xs-12">
         {% if pheno.category %}
           <p>Category: {{ pheno.category}}</p>
         {% endif %}
@@ -160,7 +159,7 @@
             <!-- </select> -->
           </th>
           <th style="cursor: pointer; user-select: none;" data-sort="info:desc:number">info score</th>
-          <th style="cursor: pointer; user-select: none;" data-sort="fin_enrichment:desc:mixed">FIN enrichment vs. NFEE</th>
+          <th style="cursor: pointer; user-select: none;" data-sort="fin_enrichment:desc:mixed">FIN enrichment</th>
           <th style="cursor: pointer; user-select: none;" data-sort="maf:desc:number">af</th>
           <th style="cursor: pointer; user-select: none;" data-sort="maf_cases:desc:number">af cases</th>
           <th style="cursor: pointer; user-select: none;" data-sort="maf_controls:desc:number">af controls</th>
@@ -206,18 +205,16 @@
 </script>
 
 <script type="text/template" id="info-tooltip-template">
-  <div style='display: flex; flex-direction: column; flex-wrap: wrap; height: 320px;'>
+  <table>
     <%= Object.keys(v.annotation)
     .filter(function(key) {
-      return key.indexOf('INFO_') === 0
-	}).map(function(key) {
-	var val = v.annotation[key].toFixed(3)
-	var color = val < window.vis_conf.info_tooltip_threshold ? '#FF8C00' : '#ffffff'
-      return '<div style=\'color: ' + color + '\'><span style=\'text-align: left; float: left; padding-right: 10px;\'>' + val + '</span>' +
-        '<span style=\'text-align: left; float: left;\'>' + key.replace(/INFO_|\.calls|_Drem|_R[1-9]/g, '') + '</span></div>'
+      return key.indexOf('info_') === 0
+    }).map(function(key) {
+      return '<tr><td style=\'text-align: right; padding-right: 10px;\'>' + v.annotation[key].toPrecision(3) + '</td>' +
+        '<td nowrap style=\'text-align: left;\'>' + key.replace(/info_|_r1/g, '') + '</td></tr>'
     }).join('')
     %>
-  </div>
+  </table>
 </script>
 
 <script type="text/template" id="enrichment-tooltip-template">
@@ -225,9 +222,9 @@
   <table>
     <tr><th style='text-align: right; padding-right: 5px;'>FIN</th><th style='text-align: right; padding-right: 5px;'>NFE</th><th style='text-align: right; padding-right: 5px;'>POPMAX</th></tr>
     <tr>
-      <td style='text-align: right; padding-right: 5px;'><%= v.gnomad ? $.isNumeric(v.gnomad.AF_fin) ? v.gnomad.AF_fin < 0.01 ? v.gnomad.AF_fin.toExponential(1) : v.gnomad.AF_fin.toPrecision(2) : "N/A" : "N/A" %></td>
-      <td style='text-align: right; padding-right: 5px;'><%= v.gnomad ? $.isNumeric(v.gnomad.AF_nfe) ? v.gnomad.AF_nfe < 0.01 ? v.gnomad.AF_nfe.toExponential(1) : v.gnomad.AF_nfe.toPrecision(2) : "N/A" : "N/A" %></td>
-      <td style='text-align: right; padding-right: 5px;'><%= v.gnomad ? $.isNumeric(v.gnomad.AF_popmax) ? v.gnomad.AF_popmax < 0.01 ? v.gnomad.AF_popmax.toExponential(1) : v.gnomad.AF_popmax.toPrecision(2) : "N/A" : "N/A" %></td>
+      <td style='text-align: right; padding-right: 5px;'><%= v.gnomad ? $.isNumeric(v.gnomad.AF_FIN) ? v.gnomad.AF_FIN < 0.01 ? v.gnomad.AF_FIN.toExponential(1) : v.gnomad.AF_FIN.toPrecision(2) : "N/A" : "N/A" %></td>
+      <td style='text-align: right; padding-right: 5px;'><%= v.gnomad ? $.isNumeric(v.gnomad.AF_NFE) ? v.gnomad.AF_NFE < 0.01 ? v.gnomad.AF_NFE.toExponential(1) : v.gnomad.AF_NFE.toPrecision(2) : "N/A" : "N/A" %></td>
+      <td style='text-align: right; padding-right: 5px;'><%= v.gnomad ? $.isNumeric(v.gnomad.AF_POPMAX) ? v.gnomad.AF_POPMAX < 0.01 ? v.gnomad.AF_POPMAX.toExponential(1) : v.gnomad.AF_POPMAX.toPrecision(2) : "N/A" : "N/A" %></td>
     </tr>
   </table>
 </script>
@@ -259,7 +256,7 @@
     <%= v.chrom %>
   </td>
   <td style="width: 9%;">
-    <a style="color:black" href="/variant/<%= v.chrom.replace('X', '23') %>-<%= v.pos %>-<%= v.ref %>-<%= v.alt %>"><%= v.pos.toLocaleString() %></a>
+    <a style="color:black" href="/variant/<%= v.chrom %>-<%= v.pos %>-<%= v.ref %>-<%= v.alt %>"><%= v.pos.toLocaleString() %></a>
   </td>
   <td <%= v.ref.length > 5 ? "data-toggle=\"tooltip\" title=\"" + v.ref + "\"" : "" %> style="width: 6%; text-align: center;">
     <%= v.ref.length > 5 ? v.ref.substring(0,5) + '...' : v.ref %>
@@ -268,7 +265,7 @@
     <%= v.alt.length > 5 ? v.alt.substring(0,5) + '...' : v.alt %>
   </td>
   <td style="width: 9%;">
-    <a style="color:black" href="/variant/<%= v.chrom.replace('X', '23') %>-<%= v.pos %>-<%= v.ref %>-<%= v.alt %>"><% if (v.rsids) { %><%= v.rsids.replace(/,/g, ', ') %><% } %></a>
+    <a style="color:black" href="/variant/<%= v.chrom %>-<%= v.pos %>-<%= v.ref %>-<%= v.alt %>"><% if (v.rsids) { %><%= v.rsids.replace(/,/g, ', ') %><% } %></a>
   </td>
   <td style="width: 9%;">
     <% for (let i = 0, genes = v.nearest_genes.split(','); i < genes.length; i++) { %>
@@ -277,10 +274,10 @@
   <% } %>
   </td>
   <td style="width: 6%;">
-    <%= (v.annotation && v.annotation.most_severe)? v.annotation.most_severe : "" %>
+    <%= (v.most_severe)? v.most_severe : "" %>
   </td>
-  <td class="info-score" style="width: 6%;" title="<%= _.template($('#info-tooltip-template').html())({v:v}) %>" data-toggle="tooltip">
-    <%= (v.annotation && v.annotation.INFO)? v.annotation.INFO.toPrecision(3) : "" %>
+  <td class="info-score" style="width: 6%;">
+    <%= (v.annotation)? v.annotation.info.toPrecision(3) : "" %>
   </td>
   <td style="width: 6%;" title="<%= _.template($('#enrichment-tooltip-template').html())({v: v}) %>" data-toggle="tooltip">
     <%= (v.fin_enrichment)? $.isNumeric(v.fin_enrichment) ? v.fin_enrichment.toPrecision(3) : v.fin_enrichment : "" %>

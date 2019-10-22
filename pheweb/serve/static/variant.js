@@ -14,16 +14,15 @@ LocusZoom.TransformationFunctions.set("percent", function(x) {
 
 (function() {
     // sort phenotypes
-    // 
-    if (_.any(window.results.map(function(d) { return d.phenocode; }).map(parseFloat).map(isNaN))) {
-        window.results = _.sortBy(window.results, function(d) { return d.phenocode; });
+    if (_.any(window.variant.phenos.map(function(d) { return d.phenocode; }).map(parseFloat).map(isNaN))) {
+        window.variant.phenos = _.sortBy(window.variant.phenos, function(d) { return d.phenocode; });
     } else {
-        window.results = _.sortBy(window.results, function(d) { return parseFloat(d.phenocode); });
+        window.variant.phenos = _.sortBy(window.variant.phenos, function(d) { return parseFloat(d.phenocode); });
     }
 
     window.first_of_each_category = (function() {
         var categories_seen = {};
-        return window.results.filter(function(pheno) {
+        return window.variant.phenos.filter(function(pheno) {
             if (categories_seen.hasOwnProperty(pheno.category)) {
                 return false;
             } else {
@@ -40,14 +39,14 @@ LocusZoom.TransformationFunctions.set("percent", function(x) {
         return rv;
     })();
     // _.sortBy is a stable sort, so we just sort by category_order and we're good.
-    window.results = _.sortBy(window.results, function(d) {
+    window.variant.phenos = _.sortBy(window.variant.phenos, function(d) {
         return category_order[d.category];
     });
-    window.unique_categories = d3.set(window.results.map(_.property('category'))).values();
+    window.unique_categories = d3.set(window.variant.phenos.map(_.property('category'))).values();
     window.color_by_category = ((unique_categories.length>10) ? d3.scale.category20() : d3.scale.category10())
         .domain(unique_categories);
 
-    window.results.forEach(function(d, i) {
+    window.variant.phenos.forEach(function(d, i) {
         d.phewas_code = d.phenocode;
         d.phewas_string = (d.phenostring || d.phenocode);
         d.category_name = d.category;
@@ -59,14 +58,14 @@ LocusZoom.TransformationFunctions.set("percent", function(x) {
 
 (function() { // Create PheWAS plot.
 
-    window.results.forEach(function(pheno) {
+    window.variant.phenos.forEach(function(pheno) {
 	pheno.pScaled = -Math.log10(pheno.pval)
 	if (pheno.pScaled > window.vis_conf.loglog_threshold) {
 	    pheno.pScaled = window.vis_conf.loglog_threshold * Math.log10(pheno.pScaled) / Math.log10(window.vis_conf.loglog_threshold)
 	}
     })
 
-    var best_neglog10_pval = d3.max(window.results.map(function(x) { return LocusZoom.TransformationFunctions.get('neglog10')(x.pval); }));
+    var best_neglog10_pval = d3.max(window.variant.phenos.map(function(x) { return LocusZoom.TransformationFunctions.get('neglog10')(x.pval); }));
 
     var neglog10_handle0 = function(x) {
 	if (x === 0) return best_neglog10_pval * 1.1;
@@ -97,7 +96,7 @@ LocusZoom.TransformationFunctions.set("percent", function(x) {
         window.debug.getData_args = [state, fields, outnames, trans];
         trans = trans || [];
 
-        var data = deepcopy(window.results); //otherwise LZ adds attributes I don't want to the original data.
+        var data = deepcopy(window.variant.phenos); //otherwise LZ adds attributes I don't want to the original data.
         data.forEach(function(d, i) {
             data[i].x = i;
             data[i].id = i.toString();
@@ -114,7 +113,7 @@ LocusZoom.TransformationFunctions.set("percent", function(x) {
     };
 
     // Define data sources object
-    var significance_threshold = 0.05 / window.results.length;
+    var significance_threshold = 0.05 / window.variant.phenos.length;
     var neglog10_significance_threshold = -Math.log10(significance_threshold);
     var data_sources = new LocusZoom.DataSources()
       .add("base", ["PheWASLZ", {url: '/this/is/not/used'}])
@@ -148,9 +147,9 @@ LocusZoom.TransformationFunctions.set("percent", function(x) {
         {field:"pval|neglog10_handle0", operator:">", value:neglog10_significance_threshold * 3/4},
         {field:"pval|neglog10_handle0", operator:">", value:best_neglog10_pval / 4},
     ];
-    if (window.results.length > 10) {
+    if (window.variant.phenos.length > 10) {
         pval_data_layer.label.filters.push(
-            {field:"pval", operator:"<", value:_.sortBy(window.results.map(_.property('pval')))[10]});
+            {field:"pval", operator:"<", value:_.sortBy(window.variant.phenos.map(_.property('pval')))[10]});
     }
 
     // Color points by category.
@@ -183,7 +182,7 @@ LocusZoom.TransformationFunctions.set("percent", function(x) {
     });
 
     // Show (log-)log scale on the y axis
-    var maxLogPScaled = window.results.reduce((acc, cur) => {
+    var maxLogPScaled = window.variant.phenos.reduce((acc, cur) => {
 	return Math.max(acc, cur.pScaled)
     }, 0)
     var ticks = []
@@ -196,17 +195,19 @@ LocusZoom.TransformationFunctions.set("percent", function(x) {
     }
     phewas_panel.axes.y1.ticks = ticks
 
-    phewas_panel.axes.y1.label = '-log\u2081\u2080p-value'
+    phewas_panel.axes.y1.label = window.vis_conf.loglog_threshold == 10 ?
+	'-log\u2081\u2080(p-value) or ' + window.vis_conf.loglog_threshold + ' \u2022 log\u2081\u2080(-log\u2081\u2080(p-value))':
+	'-log\u2081\u2080(p-value) or ' + window.vis_conf.loglog_threshold + ' \u2022 log\u2081\u2080(-log\u2081\u2080(p-value)) / log\u2081\u2080(' + window.vis_conf.loglog_threshold + ')'
 
     // add a little x-padding so that no points intersect the edge
-    pval_data_layer.x_axis.min_extent = [-1, window.results.length];
+    pval_data_layer.x_axis.min_extent = [-1, window.variant.phenos.length];
 
 
     window.debug.phewas_panel = phewas_panel;
     window.debug.pval_data_layer = pval_data_layer;
     var layout = {
         state: {
-            variant: ['chr', 'pos', 'ref', 'alt'].map(function(d) { return window.variant[d];}).join("-"),
+            variant: ['chrom', 'pos', 'ref', 'alt'].map(function(d) { return window.variant[d];}).join("-"),
         },
         dashboard: {
             components: [
@@ -233,8 +234,8 @@ LocusZoom.TransformationFunctions.set("percent", function(x) {
 // Check MAF/AF/AC and render
 (function() {
     var isnum = function(d) { return typeof d == "number"; };
-    var mafs = window.results.map(function(v) {
-        if (isnum(v.maf_control))  { return v.maf_control; }
+    var mafs = window.variant.phenos.map(function(v) {
+        if (isnum(v.maf))  { return v.maf; }
         else if (isnum(v.af)) { return v.af; }
         else if (isnum(v.ac) && isnum(v.num_samples)) { return v.ac / v.num_samples; }
         else { return undefined; }
@@ -244,80 +245,25 @@ LocusZoom.TransformationFunctions.set("percent", function(x) {
     if (num_phenos_with_maf === mafs.length) {
         var range = d3.extent(mafs);
         $(function() {
-            $('#maf-range').html('<p style="text-decoration: underline;" title="' + _.template($('#af-tooltip-template').html())({v:window.variant}) + '" data-toggle="tooltip">AF ' + (window.variant.annot && window.variant.annot.AF && window.variant.annot.AF.toExponential(1)) + ' (ranges from ' + range[0].toExponential(1) + ' to ' + range[1].toExponential(1) + ' across all phenotypes)</p>');
+            $('#maf-range').html('<p>AF ranges from ' + range[0].toExponential(1) + ' to ' + range[1].toExponential(1) + '</p>');
             $('#maf-range p').css('margin-bottom', '0');
         });
     } else if (num_phenos_with_maf > 0) {
         var range = d3.extent(mafs);
         $(function() {
-            $('#maf-range').html('<p style="text-decoration: underline;" title="' + _.template($('#af-tooltip-template').html())({v:window.variant}) + '" data-toggle="tooltip">AF ' + (window.variant.annot && window.variant.annot.AF && window.variant.annot.AF.toExponential(1)) + ' (ranges from ' + range[0].toExponential(1) + ' to ' + range[1].toExponential(1) + ') for phenotypes where it is defined</p>');
+            $('#maf-range').html('<p>AF ranges from ' + range[0].toExponential(1) + ' to ' + range[1].toExponential(1) + ' for phenotypes where it is defined</p>');
             $('#maf-range p').css('margin-bottom', '0');
         });
     }
 })();
 
-(function() {
-    if (window.variant.gnomad) {
-	$(function() {
-	    if (!variant.gnomad) {
-		variant.gnomad = {fin_enrichment: 'No data in Gnomad'}
-	    } else if (variant.gnomad.AF_fin === 0) {
-		variant.gnomad.fin_enrichment = 'No FIN in Gnomad'
-	    } else if (+variant.gnomad['AC_nfe_nwe'] + +variant.gnomad['AC_nfe_onf'] + +variant.gnomad['AC_nfe_seu'] == 0) {
-		variant.gnomad.fin_enrichment = 'No NFEE in Gnomad'
-	    } else {
-		variant.gnomad.fin_enrichment = +variant.gnomad['AC_fin'] / +variant.gnomad['AN_fin'] /
-		    ( (+variant.gnomad['AC_nfe_nwe'] + +variant.gnomad['AC_nfe_onf'] + +variant.gnomad['AC_nfe_seu']) / (+variant.gnomad['AN_nfe_nwe'] + +variant.gnomad['AN_nfe_onf'] + +variant.gnomad['AN_nfe_seu']) )
-	    }
-	    if (!isNaN(parseFloat(variant.gnomad.fin_enrichment)) && isFinite(variant.gnomad.fin_enrichment)) {
-		variant.gnomad.fin_enrichment = variant.gnomad.fin_enrichment.toFixed(3)
-	    }
-	    var af_fin = window.variant.gnomad.AF_fin
-	    if (af_fin && !isNaN(parseFloat(af_fin)) && isFinite(af_fin)) {
-		af_fin = af_fin.toExponential(1)
-	    }
-	    var af_popmax = window.variant.gnomad.AF_popmax
-	    if (af_popmax && !isNaN(parseFloat(af_popmax)) && isFinite(af_popmax)) {
-		af_popmax = af_popmax.toExponential(1)
-	    }
-	    $('#gnomad').html('<p style="text-decoration: underline;" title="' + _.template($('#gnomad-tooltip-template').html())({v:window.variant}) + '" data-toggle="tooltip">AF in gnomAD genomes 2.1: FIN ' + af_fin + ', POPMAX ' + af_popmax + ', FIN enrichment vs. NFEE: ' + window.variant.gnomad.fin_enrichment + '</p>')
-            $('#gnomad p').css('margin-bottom', '0');
-	})
-    }
-})();
-
-(function() {
-    var isnum = function(d) { return typeof d == "number"; };
-    var infos = Object.keys(window.variant.annot).filter(function(key) { 
-         return key.indexOf('INFO_') === 0
-    }).map(function(k) {
-        return window.variant.annot[k]  
-    });
-    var range = d3.extent(infos);
-    $(function() {
-            $('#info-range').html('<p style="text-decoration: underline;" title="' + _.template($('#info-tooltip-template').html())({v:window.variant}) + '" data-toggle="tooltip">INFO ' + (window.variant.annot && window.variant.annot.INFO && window.variant.annot.INFO.toFixed(3)) + ' (ranges in genotyping batches from ' + range[0].toFixed(3) + ' to ' + range[1].toFixed(3) + ')</p>');
-        $('#info-range p').css('margin-bottom', '0');
-    });
-    
-})();
-
-(function() {
-    if (window.variant.annot && window.variant.annot.most_severe) {
-	$(function() {
-	    $('#most_severe').html('<p>Most severe consequence: ' + window.variant.annot.most_severe.replace(/_/g, ' ') + '<p>')
-            $('#most_severe p').css('margin-bottom', '0');
-	})
-    }
-})();
-
-
 
 // Check Clinvar and render link.
 (function() {
-    var clinvar_api_template = _.template('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=clinvar&term=<%= chr %>[Chromosome]%20AND%20<%= pos %>[Base%20Position%20for%20Assembly%20GRCh37]&retmode=json');
+    var clinvar_api_template = _.template('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=clinvar&term=<%= chrom %>[Chromosome]%20AND%20<%= pos %>[Base%20Position%20for%20Assembly%20GRCh37]&retmode=json');
     var clinvar_api_url = clinvar_api_template(window.variant);
 
-    var clinvar_link_template = _.template('https://www.ncbi.nlm.nih.gov/clinvar?term=<%= chr %>[Chromosome]%20AND%20<%= pos %>[Base%20Position%20for%20Assembly%20GRCh37]');
+    var clinvar_link_template = _.template('https://www.ncbi.nlm.nih.gov/clinvar?term=<%= chrom %>[Chromosome]%20AND%20<%= pos %>[Base%20Position%20for%20Assembly%20GRCh37]');
     var clinvar_link_url = clinvar_link_template(window.variant);
 
     $.getJSON(clinvar_api_url).done(function(result) {
@@ -329,8 +275,8 @@ LocusZoom.TransformationFunctions.set("percent", function(x) {
 })();
 
 (function() {
-    if (!window.variant.annot.rsids) return
-    var rsid = window.variant.annot.rsids.split(',')[0]
+    if (!window.variant.rsids) return
+    var rsid = window.variant.rsids.split(',')[0]
     $.getJSON('http://grch37.rest.ensembl.org/variation/human/' + rsid + '?content-type=application/json')
         .done(function(result) {
             if (result.mappings && result.mappings[0]) {
@@ -345,11 +291,11 @@ LocusZoom.TransformationFunctions.set("percent", function(x) {
 })();
 
 // Check PubMed for each rsid and render link.
-if (typeof window.variant.annot.rsids !== "undefined") {
+if (typeof window.variant.rsids !== "undefined") {
     (function() {
         var pubmed_api_template = _.template('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmax=1&retmode=xml&term=<%= rsid %>');
         var pubmed_link_template = _.template('https://www.ncbi.nlm.nih.gov/pubmed/?term=<%= rsid %>');
-        var rsids = window.variant.annotation.rsids.split(','); // There's usually just one rsid.
+        var rsids = window.variant.rsids.split(','); // There's usually just one rsid.
         rsids.forEach(function(rsid) {
             var pubmed_api_url = pubmed_api_template({rsid: rsid});
             var pubmed_link_url = pubmed_link_template({rsid: rsid});
@@ -384,7 +330,7 @@ if (typeof window.variant.annot.rsids !== "undefined") {
 // Populate StreamTable
 $(function() {
     // This is mostly copied from <https://michigangenomics.org/health_data.html>.
-    var data = _.filter(window.results, function(pheno) { return !!pheno.pval });
+    var data = _.filter(window.variant.phenos, function(pheno) { return !!pheno.pval });
     data = _.sortBy(data, function(pheno) { return pheno.pval; });
     var template = _.template($('#streamtable-template').html());
 
@@ -417,6 +363,7 @@ $(function() {
             per_page: 10
         }
     }
+
     $('#stream_table').stream_table(options, data);
 
     var pheno = new URL(window.location.href).searchParams.get('pheno')
@@ -429,24 +376,16 @@ $(function() {
 });
 
 $(function () {
-    $("#export").click( function (event) {
-    exportTableToCSV.apply(this, [$('#stream_table'),window.variant.id.replace(/ |,|/g,"") + "_phenotype_associations.tsv",window.var_top_pheno_export_fields])
+  $("#export").click( function (event) {
+    console.log()
+    exportTableToCSV.apply(this, [$('#stream_table'),window.variant.variant_name.replace(/ |,|/g,"") + "_phenotype_associations.tsv",window.var_top_pheno_export_fields])
   });
 })
 
 $(function () {
-    var maxLogLogP = d3.max(window.results, function(d) { return d.pScaled });
+    var maxLogLogP = d3.max(window.variant.phenos, function(d) { return d.pScaled });
     if (maxLogLogP >= window.vis_conf.loglog_threshold) {
 	$("#loglog-note").append("<span>p-values smaller than 1e-" + window.vis_conf.loglog_threshold + " are shown on a log-log scale</span>");
 	$("#loglog-note").css("display", "inline-block");
     }
 })
-
-$(function () {
-    $('[data-toggle="tooltip"]').tooltip({
-        html: true,
-        animation: false,
-        container: 'body',
-        placement: 'bottom'
-    })
-});

@@ -514,11 +514,10 @@ function populate_streamtable(variants) {
                 $('.selectpicker').val().map(function(val) {
                     return val.replace(/\([0-9]+\) /,'')
                 }) : [];
+            //console.log(selected);
             if (selected.length > 0 && selected.indexOf(variant.most_severe) === -1) {
                 return null;
             } else {
-		//TODO all variants should have annotation
-		if (!variant.annotation) variant.annotation = {}
                 return template({v: variant});
             }
         };
@@ -728,22 +727,40 @@ $(function () {
             window.data = data;
             // add consequence so that stream table can be filtered on it
             data.unbinned_variants.filter(function(variant) { return !!variant.annotation } ).forEach(function(variant) {
-                variant.annotation.most_severe = variant.annotation.most_severe ? variant.annotation.most_severe.replace(/_/g, ' ').replace(' variant', '') : ''
-                variant.info = variant.annotation.INFO
+                variant.most_severe = variant.annotation.most_severe.replace(/_/g, ' ').replace(' variant', '')
+                variant.info = variant.annotation.info
             })
             data.unbinned_variants.forEach(function(variant) {
-		if (!variant.gnomad) {
-		    variant.fin_enrichment = 'No data in Gnomad'
-		} else if (variant.gnomad.AF_fin === 0) {
-		    variant.fin_enrichment = 'No FIN in Gnomad'
-		} else if (+variant.gnomad['AC_nfe_nwe'] + +variant.gnomad['AC_nfe_onf'] + +variant.gnomad['AC_nfe_seu'] == 0) {
-		    variant.fin_enrichment = 'No NFEE in Gnomad'
-		} else {
-		    variant.fin_enrichment = +variant.gnomad['AC_fin'] / +variant.gnomad['AN_fin'] /
-			( (+variant.gnomad['AC_nfe_nwe'] + +variant.gnomad['AC_nfe_onf'] + +variant.gnomad['AC_nfe_seu']) / (+variant.gnomad['AN_nfe_nwe'] + +variant.gnomad['AN_nfe_onf'] + +variant.gnomad['AN_nfe_seu']) )
-		}
-            })
+        if (!variant.gnomad) {
+                    variant.fin_enrichment = 'No data in Gnomad'
+        } else {
+                    if (variant.gnomad.POPMAX === 'FIN') {
+            var afs = Object.keys(variant.gnomad)
+                .filter(function(key) {
+                return key.startsWith('AF_') && key !== 'AF_OTH'
+                })
+                .map(function(key) {
+                return {key: key, value: variant.gnomad[key]}
+                })
+                .sort(function(a, b) {
+                return a.value - b.value
+                })
+            if (+afs[afs.length - 3].value === 0) {
+                variant.fin_enrichment = 'Only FIN in Gnomad'
+            } else {
+                variant.fin_enrichment = +variant.gnomad.AF_FIN / +afs[afs.length - 3].value
+                variant.fin_enrichment_versus = afs[afs.length - 3].key.replace('AF_', '')
+            }
+                    } else if (variant.gnomad.AF_FIN === 0) {
+            variant.fin_enrichment = 'No FIN in Gnomad'
+            } else {
+            variant.fin_enrichment = +variant.gnomad.AF_FIN / +variant.gnomad.AF_POPMAX
+            variant.fin_enrichment_versus = variant.gnomad.POPMAX
+                    }
+        }
+        })
             create_gwas_plot(data.variant_bins, data.unbinned_variants);
+
             populate_streamtable(data.unbinned_variants);
             //TODO filtering with streamtable
             //create_consequence_dropdown(data.unbinned_variants);
