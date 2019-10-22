@@ -29,18 +29,14 @@ spec:
             topologyKey: kubernetes.io/hostname
       containers:
       - name: pheweb-container
-        image: gcr.io/phewas-development/pheweb_meta:0.41
+        image: gcr.io/phewas-development/pheweb_meta:0.5
         ports:
         - containerPort: 8080
         volumeMounts:
-        - mountPath: /mnt/meta
-          name: pheweb-pv
-  volumeClaimTemplates:
-  - metadata:
-      name: pheweb-pv
-    spec:
-      storageClassName: ""
-      accessModes: [ ReadWriteOnce ]
-      resources:
-        requests:
-          storage: 200Gi
+        - mountPath: /mnt/nfs
+          name: pheweb-nfs
+      volumes:
+      - name: pheweb-nfs
+        persistentVolumeClaim:
+          claimName: nfs-claim
+          readOnly: false
