@@ -10,7 +10,7 @@ spec:
   selector:
     matchLabels:
       app: pheweb
-  replicas: 1
+  replicas: 3
   template:
     metadata:
       labels:
@@ -29,7 +29,7 @@ spec:
             topologyKey: kubernetes.io/hostname
       containers:
       - name: pheweb-container
-        image: gcr.io/phewas-development/pheweb:r2_terminal
+        image: gcr.io/phewas-development/pheweb:r2_public_0
         ports:
         - containerPort: 8080
         volumeMounts:
