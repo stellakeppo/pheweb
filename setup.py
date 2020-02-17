@@ -50,6 +50,7 @@ setup(
         'Flask-Compress~=1.4',
         'Flask-Login~=0.4',
         'rauth~=0.7',
+        'cython~=0.29',
         'pysam~=0.14',
         'marisa-trie~=0.7',
         'intervaltree~=2.1',
