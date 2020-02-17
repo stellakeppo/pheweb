@@ -59,7 +59,7 @@ setup(
         'numpy~=1.14',
         'requests[security]~=2.18',
         'cryptography~=2.3',
-        'idna~=2.6',
+        'idna==2.8',
         'gunicorn~=19.7',
         'boltons~=18.0',
         'blist~=1.3',

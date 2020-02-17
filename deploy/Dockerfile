@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install --no-install-recommends texlive wget --yes
 ADD . /pheweb
 
 RUN apt-get install python3-pip libffi-dev libz-dev libssl-dev libbz2-dev liblzma-dev --yes && \
+    pip3 install cython && \
     pip3 install /pheweb
 
 EXPOSE 8080

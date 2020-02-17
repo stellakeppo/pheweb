@@ -86,7 +86,7 @@ function pValueToReadable(p) {
 
 function exportTableToCSV($table, filename, export_cols=null) {
     var sTableData = $table.data('st').getData()
-
+    
     var colDelim = '\t'
     var rowDelim = '\r\n'
 
@@ -108,8 +108,14 @@ function exportTableToCSV($table, filename, export_cols=null) {
       return result
     }
 
-    var header = get_fields( sTableData[0], false)
-    var acceptInd =  export_cols!=null ? export_cols.map( function(elem) { return header.indexOf(elem) } ).filter( function(ind) { return ind>=0} ): null
+    var headers = []
+    for (var i = 0; i < sTableData.length; i++) {
+    	headers.push(get_fields(sTableData[i], false))
+    }
+    var acceptInds = []
+    for (let i = 0; i < headers.length; i++) {
+    	acceptInds.push(export_cols!=null ? export_cols.map( function(elem) { return headers[i].indexOf(elem) } ).filter( function(ind) { return ind>=0} ): null)
+    }
 
     function filter_cols(row, acceptInd) {
       if (acceptInd!=null) {
@@ -119,9 +125,9 @@ function exportTableToCSV($table, filename, export_cols=null) {
       }
     }
 
-    var csv = filter_cols(header, acceptInd).join(colDelim)
+    var csv = filter_cols(headers[0], acceptInds[0]).join(colDelim)
     csv+=rowDelim
-    csv+=sTableData.map( function( row ) { return filter_cols(get_fields(row), acceptInd).join(colDelim) }).join(rowDelim)
+    csv+=sTableData.map( function( row, i ) { return filter_cols(get_fields(row), acceptInds[i]).join(colDelim) }).join(rowDelim)
 
     var createObjectURL = (window.URL || window.webkitURL || {}).createObjectURL || function(){}
     var csvFile = new Blob([csv], {type: "text/csv"});
