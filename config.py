@@ -1,44 +1,32 @@
 authentication=False
-authentication_file = "/mnt/r3_1/google.prod.conf"
+authentication_file = "/mnt/nfs/pheweb/r2/google.r2.conf"
 
-data_dir="/mnt/r3_1"
+data_dir="/mnt/nfs/pheweb/r2/"
 
-database_conf = (
-    {
-        "annotation": {
-            "TabixAnnotationDao": { "const_arguments": [("matrix_path","ANNOTATION_MATRIX_PATH")] } }
-    }, {
-        "result": {
-            "TabixResultDao": { 'const_arguments': [("phenos","PHEWEB_PHENOS"), ("matrix_path","MATRIX_PATH")] }
-        }
-    }, {
-        "gnomad": {
-            "TabixGnomadDao": { "const_arguments": [("matrix_path","GNOMAD_MATRIX_PATH")] }
-        }
-    }, {
-        "lof": {
-            "ElasticLofDao": { "host":"35.240.29.13","port":9200, "gene_index":"finngen_r3_lof" }
-        }
-    }, {
-        "externalresultmatrix": {
-            "ExternalMatrixResultDao": {"matrix":"/mnt/r3_1/ukbb/matrix.tsv.gz", "metadatafile":"/mnt/r3_1/ukbb/ukbb_r1_match_pheno_dup_correct_simple_meta.tsv"}
-        }
-    }, {
-        "externalresult": {
-            "ExternalFileResultDao": {"manifest":"/mnt/r3_1/ukbb/ukbb_r1_match_pheno_dup_correct_ssd.tsv"}
-        }
-    }, {
-        "tsv": {
-            "TSVDao": {"coding":"/mnt/r3_1/tsv/coding_web.txt"}
-        }
-    }, {
-        "finemapping" : {
-            "FineMappingMySQLDao": { "authentication_file": "/mnt/r3_1/mysql.conf", "base_paths": {"conditional": "/mnt/r3_1/finemapping/conditional", "susie": "/mnt/r3_1/finemapping/susie/snp", "finemap": "/mnt/r3_1/finemapping/finemap/cred"} }
-        }
-    }
-)
+cache="/mnt/nfs/pheweb/r2/cache/"
 
-n_query_threads=4
+database_conf = ({ "annotation":
+                   { "TabixAnnotationDao": { "matrix_path": "/mnt/nfs/annotations/r2/annotated_variants.gz" } }
+                 },
+                 { "result": { "TabixResultDao": { 'const_arguments': [("phenos","PHEWEB_PHENOS"), ("matrix_path","MATRIX_PATH")] } } },
+                 {
+                     "gnomad": {
+                         "TabixGnomadDao": { "matrix_path": "/mnt/nfs/annotations/gnomad20/gnomad.genomes.r2.0.2.sites.chrALL.liftover.b38.af.finngen.tsv.gz" }
+                     }
+                 },
+                 {
+                     "lof": {
+                         "LofMySQLDao": { "authentication_file": "/mnt/nfs/pheweb/r2/mysql.conf" }
+                     }
+                 }, {
+                     "externalresultmatrix": {
+                         "ExternalMatrixResultDao": {"matrix":"/mnt/nfs/ukbb_neale/matrix.tsv.gz", "metadatafile":"/mnt/nfs/ukbb_neale/ukbb_r1_match_pheno_dup_correct_simple_meta.tsv"}
+                     }
+                 }, {
+                     "externalresult": {
+                         "ExternalFileResultDao": {"manifest":"/mnt/nfs/ukbb_neale/ukbb_r1_match_pheno_dup_correct_ssd.tsv"}
+                    }
+                 }
+                )
+
 report_conf = {"func_var_assoc_threshold":0.0001, "gene_top_assoc_threshold":0.0001}
-
-locuszoom_conf = {"p_threshold": 0.05, "prob_threshold": 0.0001}
