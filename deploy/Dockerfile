@@ -1,4 +1,4 @@
-FROM debian:9
+FROM debian:10
 
 # can change this in k8s deployment yaml to serve from another directory
 ENV PHEWEB_DIR /mnt/nfs/pheweb/r6
