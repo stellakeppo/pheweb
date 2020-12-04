@@ -164,6 +164,9 @@
 		{% if config.endpoint_def %}
                 <li><a href="{{ url_for('static', filename=config.endpoint_def) }}" style="color: #333; font-weight: bold;">Download Endpoint Definitions</a></li>
 		{% endif %}
+                {% if config.doc_link %}
+                <li><a href="{{config.doc_link}}" style="color: #333; font-weight: bold;">Docs</a></li>
+                {% endif %}
                 <li><a href="/about" style="color: #333; font-weight: bold;">About</a></li>
                 {% if current_user and current_user.is_authenticated %}
                 <li><a href="{{ url_for('logout') }}" style="color: #333; font-weight: bold;">Logout ({{ current_user.email }})</a></li>

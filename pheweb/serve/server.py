@@ -83,6 +83,8 @@ app.config['title'] = conf['title']
 app.config['page_title'] = conf['page_title']
 if 'endpoint_def' in conf:
     app.config['endpoint_def'] = conf['endpoint_def']
+if 'doc_link' in conf:
+    app.config['doc_link'] = conf['doc_link']
 app.config['lof'] = 'lof' in [list(c.keys())[0] for c in conf.database_conf]
 app.config['coding'] = False
 app.config['chip'] = False
