@@ -1,6 +1,8 @@
 {
     "pheweb_import.summaryfiles":"gs://r6_data/pheno/extra/test_phenos.txt",
     "pheweb_import.docker": "gcr.io/finngen-refinery-dev/pheweb_import:7d21b",
+# ANNOTATION
+    "pheweb_import.annotation.annotation_docker": "eu.gcr.io/finngen-refinery-dev/pheweb_annotation:pete.test.2",
     #PHENO
     "pheweb_import.pheno.replace_prefix": "finngen_R6_",
     "pheweb_import.pheno.trie1": "gs://r6_data/pheweb/full/cpra_to_rsids_trie.marisa",

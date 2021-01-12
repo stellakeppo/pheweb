@@ -2,60 +2,71 @@
 task annotation {
 
     File phenofile
+    String? annotation_docker
     String docker
 
+    String? final_docker = if defined(annotation_docker) then annotation_docker else docker
+    String dir = '/cromwell_root/'
     command {
-    	cd /cromwell_root/
-	
+	cd ${dir}
+        
         mkdir -p pheweb/generated-by-pheweb/parsed && \
-            mkdir -p pheweb/generated-by-pheweb/tmp && \
-            echo "placeholder" > pheweb/generated-by-pheweb/tmp/placeholder.txt && \
-            mv ${phenofile} pheweb/generated-by-pheweb/parsed/ && \
-            cd pheweb && \
-            if [ -f generated-by-pheweb/parsed/*.gz ]; then gunzip generated-by-pheweb/parsed/*.gz; fi && \
-            sed -i 's/#chrom/chrom/' generated-by-pheweb/parsed/* && \
+        mkdir -p pheweb/generated-by-pheweb/tmp && \
+        echo "placeholder" > pheweb/generated-by-pheweb/tmp/placeholder.txt && \
+        mv ${phenofile} pheweb/generated-by-pheweb/parsed/ && \
+        cd pheweb && \
+        if [ -f generated-by-pheweb/parsed/*.gz ]; then gunzip generated-by-pheweb/parsed/*.gz; fi && \
+        sed -i 's/#chrom/chrom/' generated-by-pheweb/parsed/* && \
+        echo '''cache=False''' > ./config.py
 
         df -h 
         echo "dirs created"
         echo "-----------------------------------------------"
         echo "phenolist glob"
         echo "-----------------------------------------------"
+        
         df -h && pheweb phenolist glob generated-by-pheweb/parsed/*
         echo "-----------------------------------------------"
         echo "phenolist extract"
         echo "-----------------------------------------------"
         df -h &&  pheweb phenolist extract-phenocode-from-filepath --simple
+        
         echo "-----------------------------------------------"
         echo "phenolist sites"
+        echo "-----------------------------------------------"
         df -h && pheweb sites
+
         echo "-----------------------------------------------"
         echo "gene aliases"
         echo "-----------------------------------------------"
         df -h && pheweb make-gene-aliases-trie
+        
         echo "-----------------------------------------------"
         echo "rsids"
         echo "-----------------------------------------------"
         df -h && pheweb add-rsids
+        
         echo "-----------------------------------------------"
         echo "genes"
         echo "-----------------------------------------------"
         df -h && pheweb add-genes
+        
         echo "-----------------------------------------------"
         echo "tries"
         echo "-----------------------------------------------"
         df -h && pheweb make-tries 
+
+        ls
         
-        mv /root/.pheweb/cache/gene_aliases_b38.marisa_trie generated-by-pheweb/ && \
-        mv /root/.pheweb/cache/genes-b38-v25.bed generated-by-pheweb/
     }
 
     output {
-        File trie1 = "pheweb/generated-by-pheweb/sites/cpra_to_rsids_trie.marisa"
-        File trie2 = "pheweb/generated-by-pheweb/sites/rsid_to_cpra_trie.marisa"
-        File gene_trie = "pheweb/generated-by-pheweb/gene_aliases_b38.marisa_trie"
-        File sites = "pheweb/generated-by-pheweb/sites/sites.tsv"
-        File bed = "pheweb/generated-by-pheweb/genes-b38-v25.bed"
-        Array[File] tmp = glob("pheweb/generated-by-pheweb/tmp/*")
+        File trie1 = "${dir}pheweb/generated-by-pheweb/sites/cpra_to_rsids_trie.marisa"
+        File trie2 = "${dir}pheweb/generated-by-pheweb/sites/rsid_to_cpra_trie.marisa"
+        File gene_trie = "${dir}pheweb/generated-by-pheweb/sites/genes/gene_aliases_b38.marisa_trie"
+        File bed = "${dir}pheweb/generated-by-pheweb/sites/genes/genes-b38-v25.bed"
+        File sites = "${dir}pheweb/generated-by-pheweb/sites/sites.tsv"
+        Array[File] tmp = glob("${dir}pheweb/generated-by-pheweb/tmp/*")
     }
 
     runtime {
@@ -63,7 +74,7 @@ task annotation {
     	cpu: 2
     	memory: "7 GB"
         bootDiskSizeGb: 50
-        disks: "local-disk 50 HDD"
+        disks: "local-disk 100 HDD"
         zones: "europe-west1-b"
         preemptible: 0
     }
