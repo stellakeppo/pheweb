@@ -1,4 +1,75 @@
 
+task fix_json {
+
+    # standard json to edit
+    File pheno_json
+    # json with metata provided
+    File meta_json
+    Array[File] custom_jsons = read_lines(meta_json)
+    Array[String] fields
+    # qq_json info from which to extract lambda and sig hits
+    Array[File] qq_jsons
+    Array[File] man_jsons
+
+    String docker
+    # ned to loop over phenos in pheno_json
+    command <<<
+        
+    python3 <<CODE
+    DATA_DIR = '/cromwell_root/'
+    PHENO_JSON = '${pheno_json}'
+    print(DATA_DIR,PHENO_JSON)
+    
+    import json,os
+    with open(PHENO_JSON) as f:phenolist = json.load(f)
+
+    # function that finds the pheno file in the proper folder, without dealing with paths
+    def find(name, path,subpath):
+        for root, dirs, files in os.walk(path):
+            if name in files and subpath in root:
+                return os.path.join(root, name)
+
+    final_json = []
+    for p_dict in phenolist:
+        pheno = p_dict['phenocode']
+        print(pheno)
+        
+        # FIND QQ/MANHATTAN jsons
+        p_qq = find(pheno+".json",DATA_DIR,'qq')
+        with open(p_qq) as f: qq = json.load(f)
+        p_m = find(pheno+".json",DATA_DIR,'manhattan') 
+        with open(p_m) as f: manha = json.load(f)
+        # FIND METADATA
+        p_custom = find("metadata.json",DATA_DIR,pheno)
+        with open(p_custom) as f: metadata = json.load(f)
+    
+        # UPDATE P_DICT
+        p_dict['gc_lambda'] = qq['overall']['gc_lambda']
+        p_dict['num_gw_significant'] = len([v for v in manha['unbinned_variants'] if 'peak' in v and v['peak'] == True and float(v['pval']) < 5e-8])
+        fields = "${sep="," fields}".split(",")
+        print(fields)
+        for key in fields: p_dict[key] = metadata[key]
+        
+        final_json.append(p_dict)
+
+    with open('./new_pheno.json', 'a') as outfile:json.dump(final_json, outfile, indent=2)
+    CODE
+    >>>
+
+    output {
+        File json ='/cromwell_root/new_pheno.json'
+    }
+    
+   runtime {
+        docker: "${docker}"
+    	cpu: 1
+    	memory: "3 GB"
+        disks: "local-disk 5 HDD"
+        zones: "europe-west1-b"
+        preemptible: 0
+    }
+}
+
 task annotation {
 
     File phenofile
@@ -253,6 +324,13 @@ workflow pheweb_import {
     call matrix {
         input: pheno_gz=pheno.pheno_gz, manhattan=pheno.manhattan, docker=docker
     }
+
+    call fix_json{
+        input:
+        pheno_json = matrix.phenolist,
+        qq_jsons = pheno.qq,
+        man_jsons = pheno.manhattan        
+        }
 
    
 
