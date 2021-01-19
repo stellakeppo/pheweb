@@ -27,8 +27,17 @@ class ServerJeeves(object):
         self.gnomad_dao = self.dbs_fact.get_gnomad_dao()
         self.lof_dao = self.dbs_fact.get_lof_dao()
         self.result_dao = self.dbs_fact.get_result_dao()
-        self.ukbb_dao = self.dbs_fact.get_UKBB_dao()
-        self.ukbb_matrixdao =self.dbs_fact.get_UKBB_dao(True)
+        # UKBB dao
+        ukbb_availability = self.dbs_fact.get_UKBB_availability()
+        if ukbb_availability["externalresultmatrix"] and ukbb_availability["externalresult"]:
+            self.ukbb_dao = self.dbs_fact.get_UKBB_dao(False)
+            self.ukbb_matrixdao = self.dbs_fact.get_UKBB_dao(True)
+        elif ukbb_availability["externalresultmatrix"]:
+            self.ukbb_dao = self.dbs_fact.get_UKBB_dao(True)
+            self.ukbb_matrixdao = self.ukbb_dao
+        else:
+            self.ukbb_dao = self.dbs_fact.get_UKBB_dao(False)
+            self.ukbb_matrixdao = self.ukbb_dao
         self.coding_dao = self.dbs_fact.get_coding_dao()
         self.chip_dao = self.dbs_fact.get_chip_dao()
         self.finemapping_dao = self.dbs_fact.get_finemapping_dao()

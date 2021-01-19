@@ -717,10 +717,14 @@ class TabixResultDao(ResultDB):
 
 class ExternalMatrixResultDao(ExternalResultDB):
 
-    def __init__(self, matrix, metadatafile):
+    def __init__(self, matrix, metadatafile, column_names):
         self.matrix = matrix
         self.metadatafile = metadatafile
         self.meta = {}
+        self.column_names = {}
+        self.column_names[column_names["pval"]] = "pval" 
+        self.column_names[column_names["beta"]] = "beta"
+        self.chromprefix = ""
 
         self.res_indices = defaultdict(lambda: {})
 
@@ -749,7 +753,9 @@ class ExternalMatrixResultDao(ExternalResultDB):
 
             for i,field in enumerate(header[4:]):
                 elem,pheno = field.split("@")
-                self.res_indices[pheno][elem] = i+4
+                self.res_indices[pheno][self.column_names[elem]] = i+4
+
+            self.chromprefix = "chr" if res.readline().startswith("chr") else ""
 
     def __get_restab(self):
         if self.tabixfile is None:
@@ -762,7 +768,7 @@ class ExternalMatrixResultDao(ExternalResultDB):
         res = None
         if( phenotype in self.meta ):
             m = self.meta[phenotype]
-            res = (m["ncases"],m["ncontrol"])
+            res = (m["ncases"],m["ncontrols"])
 
         return res
 
@@ -776,17 +782,16 @@ class ExternalMatrixResultDao(ExternalResultDB):
             manifestdata = self.res_indices[phenotype]
             per_variant = []
             for var in var_list:
-                t = time.time()
-
+                #t = time.time()
                 try:
-                    iter = self.tabixfiles[ threading.get_ident() ].fetch(var.chrom , var.pos-1, var.pos)
+                    iter = self.tabixfiles[ threading.get_ident() ].fetch(self.chromprefix+str(var.chr) , var.pos-1, var.pos)
                     for ext_var in iter:
                         ext_var = ext_var.split("\t")
-                        ext_v = Variant(ext_var[0],ext_var[1], ext_var[2], ext_var[3])
+                        ext_v = Variant(ext_var[0].replace("chr","").replace("X","23").replace("Y","24").replace("MT","25"),ext_var[1], ext_var[2], ext_var[3])
                         if ext_v==var:
                             datapoints = { elem:ext_var[i] for elem,i in manifestdata.items() }
                             datapoints.update({ "var":ext_v,
-                                "n_cases": self.meta[phenotype]["ncases"], "n_controls": self.meta[phenotype]["ncontrol"] })
+                                "n_cases": self.meta[phenotype]["ncases"], "n_controls": self.meta[phenotype]["ncontrols"] })
                             res[var]=datapoints
 
                 except ValueError as e:
@@ -804,7 +809,7 @@ class ExternalMatrixResultDao(ExternalResultDB):
         t = time.time()
 
         if known_range is not None:
-             iter = self.tabixfiles[ threading.get_ident() ].fetch("chr" +known_range[0], known_range[1]-1, known_range[2])
+             iter = self.tabixfiles[ threading.get_ident() ].fetch(self.chromprefix +known_range[0], known_range[1]-1, known_range[2])
              for ext_var in iter:
                  ext_var = ext_var.split("\t")
                  ## TODO remove all chr from annotation files and remove this replace so that error will be thrown if wrong chr type is attemptent
@@ -824,7 +829,7 @@ class ExternalMatrixResultDao(ExternalResultDB):
             for var, phenos in varphenodict.items():
                 try:
                     ## todo remove CHR when annotations fixed
-                    iter = self.tabixfiles[ threading.get_ident() ].fetch( "chr" +str(var.chr), var.pos-1, var.pos)
+                    iter = self.tabixfiles[ threading.get_ident() ].fetch( self.chromprefix +str(var.chr), var.pos-1, var.pos)
                     for ext_var in iter:
                         ext_var = ext_var.split("\t")
                         chrom = ext_var[0].replace("chr","").replace("X","23").replace("Y","24").replace("MT","25")
@@ -846,14 +851,19 @@ class ExternalMatrixResultDao(ExternalResultDB):
 
 
 class ExternalFileResultDao(ExternalResultDB):
-    FILE_REQ_HEADERS = ["achr38","apos38","REF","ALT","beta","pval"]
-    ResRecord = namedtuple('ResRecord', 'name, ncases, ncontrols, file, achr38_idx, apos38_idx, REF_idx, ALT_idx, beta_idx, pval_idx')
+    #FILE_REQ_HEADERS = ["achr38","apos38","REF","ALT","beta","pval"]
+    ResRecord = namedtuple('ResRecord', 'name, ncases, ncontrols, file, chr_idx, pos_idx, ref_idx, alt_idx, beta_idx, pval_idx')
     VarRecord = namedtuple('VarRecord','origvariant,variant,chr,pos,ref,alt,beta, pval, study_name, n_cases, n_controls')
 
-    def __init__(self, manifest):
-
+    def __init__(self, manifest, column_names, chrom_is_numeric):
+        ## column_names is a Dict with keys
+        ## chr, pos, ref, alt, beta, pval
         self.manifest = manifest
         self.results = {}
+        self.column_names = column_names
+        self.FILE_REQ_HEADERS = column_names.values()
+        self.chromprefix = ""
+        self.chrom_is_numeric = chrom_is_numeric
 
         if manifest is None:
             ## initialize with none and never returns any results
@@ -886,9 +896,11 @@ class ExternalFileResultDao(ExternalResultDB):
                         raise Exception("All required headers not found in external result file:" + line[file_idx] + ". Required fields: " +
                          ",".join(self.FILE_REQ_HEADERS))
 
+                    self.chromprefix = "chr" if f.readline().startswith("chr") else ""
+
                     self.results[ line[name_idx] ] = ExternalFileResultDao.ResRecord( line[name_idx], line[ncase_idx], line[ncontrol_idx],
-                        line[file_idx] ,header.index("achr38"), header.index("apos38"), header.index("REF") ,header.index("ALT") ,
-                        header.index("beta"), header.index("pval") )
+                        line[file_idx] ,header.index(self.column_names["chr"]), header.index(self.column_names["pos"]), header.index(self.column_names["ref"]) ,header.index(self.column_names["alt"]) ,
+                        header.index(self.column_names["beta"]), header.index(self.column_names["pval"]) )
 
 
     def get_results_region(self, phenotype, chr, start, stop):
@@ -900,9 +912,9 @@ class ExternalFileResultDao(ExternalResultDB):
             tabix_iter = self._get_rows(manifestdata.file, "chr" + chrom, start-1, stop)
             for var in tabix_iter:
                 var = var.split("\t")
-                varid = [ var[manifestdata.achr38_idx],  var[manifestdata.apos38_idx], var[manifestdata.REF_idx], var[manifestdata.ALT_idx]].join(":")
-                res.append(  {"varid":varid, "chr":var[manifestdata.achr38_idx], "pos":var[manifestdata.apos38_idx],
-                        "ref":var[manifestdata.REF_idx],"alt":var[manifestdata.ALT_idx] ,"beta":var[manifestdata.beta_idx],
+                varid = [ var[manifestdata.chr_idx],  var[manifestdata.pos_idx], var[manifestdata.ref_idx], var[manifestdata.alt_idx]].join(":")
+                res.append(  {"varid":varid, "chr":var[manifestdata.chr_idx], "pos":var[manifestdata.pos_idx],
+                        "ref":var[manifestdata.ref_idx],"alt":var[manifestdata.alt_idx] ,"beta":var[manifestdata.beta_idx],
                         "pval":var[manifestdata.pval_idx],  "n_cases":manifestdata.ncases, "n_controls":manifestdata.ncontrols } )
 
         return res
@@ -925,11 +937,21 @@ class ExternalFileResultDao(ExternalResultDB):
             ext_var = var.rstrip("\n").split("\t")
             yield ext_var
 
+    def _sanitize_chrom(self, c: str)->str:
+        """Convert chromosome to form used in external data resource
+        Args:
+            c (str): chromosome string
+        Returns:
+            (str): chromosome in correct form
+        """
+        if self.chrom_is_numeric:
+            return self.chromprefix + c.replace("chr","").replace("X","23").replace("Y","24").replace("MT","25")
+        else:
+            return self.chromprefix + c.replace("chr","").replace("23","X").replace("24","Y").replace("25","MT")
 
     def get_matching_results(self, phenotype, var_list):
         res = {}
 
-        allt = time.time()
 
         if( type(var_list) is not list ):
             var_list = [var_list]
@@ -942,14 +964,14 @@ class ExternalFileResultDao(ExternalResultDB):
                 ## Running external tabix commands is way too slow!
 
                 ### TODO: remove the chr once the datafiles have been regenerated
-                fetch_chr =("chr"+ str(var.chr)).replace("23","X").replace("24","Y").replace("25","MT")
+                fetch_chr =self._sanitize_chrom(str(var.chr))
                 iterator= tabf.fetch( fetch_chr, var.pos-1, var.pos)
                 for ext_var in iterator:
                     ext_split = ext_var.split("\t")
                      ### TODO: remove this once the datafiles have been regenerated
 
-                    chrom = ext_split[manifestdata.achr38_idx].replace("chr","").replace("X","23").replace("Y","24").replace("MT","25")
-                    ext_var = Variant( chrom,ext_split[manifestdata.apos38_idx],  ext_split[manifestdata.REF_idx],ext_split[manifestdata.ALT_idx])
+                    chrom = ext_split[manifestdata.chr_idx].replace("chr","").replace("X","23").replace("Y","24").replace("MT","25")
+                    ext_var = Variant( chrom,ext_split[manifestdata.pos_idx],  ext_split[manifestdata.ref_idx],ext_split[manifestdata.alt_idx])
                     if ext_var==var:
                             res[var] = {"var":var,"beta":ext_split[manifestdata.beta_idx],"pval":ext_split[manifestdata.pval_idx],
                                     "n_cases":manifestdata.ncases, "n_controls":manifestdata.ncontrols }
@@ -1449,6 +1471,16 @@ class DataFactory(object):
             return self.dao_impl["externalresultmatrix"]
         else:
             return self.dao_impl["externalresult"]
+
+    def get_UKBB_availability(self)->Dict[str,bool]:
+        """
+        Returns:
+            (Dict[str,bool]): Dictionary with keys "externalresultmatrix" and "externalresult". Values are boolean values representing whether the UKBB DAOs are available.
+        """
+        retval = {}
+        retval["externalresultmatrix"] = "externalresultmatrix" in self.dao_impl
+        retval["externalresult"] = "externalresult" in self.dao_impl
+        return retval
 
     def get_colocalization_dao(self):
         return self.dao_impl["colocalization"] if "colocalization" in self.dao_impl else None
