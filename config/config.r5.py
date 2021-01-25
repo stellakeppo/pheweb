@@ -37,7 +37,14 @@ database_conf = (
     }, {
         "externalresultmatrix": {
             "ExternalMatrixResultDao": {"matrix":"/mnt/nfs/ukbb_neale/matrix.tsv.gz", "metadatafile":"/mnt/nfs/ukbb_neale/ukbb_r1_match_pheno_dup_correct_simple_meta.tsv",
-            "column_names":{"pval":"pval","beta":"beta"}}
+            "column_names":{
+               "chr":"#chr",
+               "pos":"pos",
+               "ref":"ref",
+               "alt":"alt",
+               "pval":"pval_EUR",
+               "beta":"beta_EUR"
+           }}
         }
     }, {
         "externalresult": {
@@ -55,7 +62,14 @@ database_conf = (
     # }, { #PAN-UKBB
     #    "externalresultmatrix": {
     #        "ExternalMatrixResultDao": {"matrix":"/mnt/nfs/pan_ukbb/pan_ukbb_matrix.tsv.gz", "metadatafile":"/mnt/nfs/pan_ukbb/single_file_manifest.tsv",
-    #        "column_names":{"pval":"pval_EUR","beta":"beta_EUR"}}
+    #        "column_names":{
+    #            "chr":"#chr",
+    #            "pos":"pos",
+    #            "ref":"ref",
+    #            "alt":"alt",
+    #            "pval":"pval_EUR",
+    #            "beta":"beta_EUR"
+    #        }}
     #    }
     # }, {
     #    "externalresult": {

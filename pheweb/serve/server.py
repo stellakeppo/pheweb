@@ -427,7 +427,8 @@ def gene_report(genename):
         if( ukbdat is not None):
             pval = float( ukbdat["pval"] )
             beta = float( ukbdat["beta"] )
-            ukbline = " \\newline UKBB: " + (" $\\Uparrow$ " if beta>=0 else " $\Downarrow$ ") + ", p:" + "{:.2e}".format(pval)
+            OR = math.exp(beta)
+            ukbline = " \\newline UKBB: " + (" $\\Uparrow$ " if beta>=0 else " $\Downarrow$ ") + "OR: {:.2f}".format(OR) + ", p: " + "{:.2e}".format(pval)
         return ukbline
 
     for var in func_vars:

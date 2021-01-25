@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 import pymysql
 import imp
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 from ...file_utils import MatrixReader, common_filepaths
 from ...utils import get_phenolist, get_gene_tuples
 
@@ -722,6 +722,10 @@ class ExternalMatrixResultDao(ExternalResultDB):
         self.metadatafile = metadatafile
         self.meta = {}
         self.column_names = {}
+        cpra = [column_names["chr"],
+                column_names["pos"],
+                column_names["ref"],
+                column_names["alt"]]
         self.column_names[column_names["pval"]] = "pval" 
         self.column_names[column_names["beta"]] = "beta"
         self.chromprefix = ""
@@ -746,9 +750,9 @@ class ExternalMatrixResultDao(ExternalResultDB):
 
         with gzip.open( self.matrix,"rt") as res:
             header = res.readline().rstrip("\n").split("\t")
-            comp_header = ["#chr","pos","ref","alt"]
+            comp_header = cpra
             if not all( [comp_header[i]==header[i] for i in [0,1,2,3]]):
-                raise Exception("External result data must be tab separated and must begin with columns: " + ",".join(req_headers) +
+                raise Exception("External result data must be tab separated and must begin with columns: " + ",".join(comp_header) +
                     " followed by individual result fields" )
 
             for i,field in enumerate(header[4:]):
@@ -1466,21 +1470,25 @@ class DataFactory(object):
     def get_autoreporting_dao(self):
         return self.dao_impl["autoreporting"] if "autoreporting" in self.dao_impl else None
 
-    def get_UKBB_dao(self, singlematrix=False):
-        if singlematrix and "externalresultmatrix" in self.dao_impl:
-            return self.dao_impl["externalresultmatrix"]
-        else:
-            return self.dao_impl["externalresult"]
-
-    def get_UKBB_availability(self)->Dict[str,bool]:
-        """
+    def get_UKBB_objects(self) -> Tuple[Optional[ExternalResultDB], Optional[ExternalResultDB]]:
+        """Get ukbb_dao anbd ukbb_matrix_dao objects
+        Args:
+            
         Returns:
-            (Dict[str,bool]): Dictionary with keys "externalresultmatrix" and "externalresult". Values are boolean values representing whether the UKBB DAOs are available.
+            (Tuple[Optional[ExternalResultDB], Optional[ExternalResultDB]]): A tuple of (ukbb_dao, ukbb_matrix_dao).
+            If only one of the dataresources is available, the other will be substituted in its place.
+            This way ukbb_dao is always usable as long as there is some data. 
         """
-        retval = {}
-        retval["externalresultmatrix"] = "externalresultmatrix" in self.dao_impl
-        retval["externalresult"] = "externalresult" in self.dao_impl
-        return retval
+        file_available = "externalresult" in self.dao_impl
+        matrix_available = "externalresultmatrix" in self.dao_impl
+        if file_available and matrix_available:
+            return (self.dao_impl["externalresult"], self.dao_impl["externalresultmatrix"])
+        elif file_available:
+            return (self.dao_impl["externalresult"], self.dao_impl["externalresult"])
+        elif matrix_available:
+            return (self.dao_impl["externalresultmatrix"], self.dao_impl["externalresultmatrix"])
+        else:
+            return (None, None)
 
     def get_colocalization_dao(self):
         return self.dao_impl["colocalization"] if "colocalization" in self.dao_impl else None

@@ -87,7 +87,8 @@
                 <th style="width: 6%;">OR</th>
                 <th style="width: 7%;">p-value</th>
                 <th style="width: 7%;">number of cases</th>
-                <th style="width: 9%;">UKBB</th>
+                <th style="width: 9%;">UKBB pval</th>
+                <th style="width: 9%;">UKBB OR</th>
                 <th style="width: 7%;">UKBB number of cases</th>
               </tr>
             </thead>
@@ -250,7 +251,8 @@
     <td><%= _.template($('#beta-template-dir').html())({assoc: p.assoc}) + Math.exp(p.assoc.beta).toFixed(2) %></td>
     <td><%= p.assoc.pval.toExponential(1) %></td>
     <td style="text-align: right;"><%= p.pheno.num_cases %></td>
-    <td><%= p.assoc.matching_results.ukbb ? _.template($('#beta-template-dir').html())({assoc: p.assoc.matching_results.ukbb}) + '<span>' + Number(p.assoc.matching_results.ukbb.pval).toExponential(1) + '</span>'  : 'NA' %></td>
+    <td><%= p.assoc.matching_results.ukbb ? Math.exp(Number(p.assoc.matching_results.ukbb.pval)).toPrecision(3) + '</span>'  : 'NA' %></td>
+    <td><%= p.assoc.matching_results.ukbb ? _.template($('#beta-template-dir').html())({assoc: p.assoc.matching_results.ukbb}) + Math.exp(Number(p.assoc.matching_results.ukbb.beta)).toPrecision(3) + '</span>'  : 'NA' %></td>
     <td><%= p.assoc.matching_results.ukbb ? p.assoc.matching_results.ukbb.n_cases:"NA"  %></td>
   </tr>
   <% } else { %>
@@ -268,7 +270,8 @@
     <td><%= _.template($('#beta-template-dir').html())({assoc: p.assoc}) +  Math.exp(p.assoc.beta).toPrecision(2) %></td>
     <td><%= p.assoc.pval.toExponential(1) %></td>
     <td style="text-align: right;"><%= p.pheno.num_cases %></td>
-    <td><%= p.assoc.matching_results.ukbb ? _.template($('#beta-template-dir').html())({assoc: p.assoc.matching_results.ukbb}) + '<span>p:' + Number(p.assoc.matching_results.ukbb.pval).toExponential(1) +'</span>' : 'NA' %></td>
+    <td><%= p.assoc.matching_results.ukbb ? Math.exp(Number(p.assoc.matching_results.ukbb.pval)).toPrecision(3) + '</span>'  : 'NA' %></td>
+    <td><%= p.assoc.matching_results.ukbb ? _.template($('#beta-template-dir').html())({assoc: p.assoc.matching_results.ukbb}) + Math.exp(Number(p.assoc.matching_results.ukbb.beta)).toPrecision(3) + '</span>'  : 'NA' %></td>
     <td><%= p.assoc.matching_results.ukbb ? p.assoc.matching_results.ukbb.n_cases:"NA"  %></td>
   </tr>
   <% } %>
@@ -308,7 +311,7 @@
     <td><table> <%= v.significant_phenos
 	    .sort(function(pheno1, pheno2) { return pheno1.pval - pheno2.pval })
 	    .map(function(pheno) {
-            return '<tr class="gene_func_var_tab"> <tr> <td class="gene_func_var_row" width="100px">' + (pheno.matching_results.ukbb ? _.template($('#beta-template-dir').html())({assoc:pheno.matching_results.ukbb}) + '<span>p:' + Number(pheno.matching_results.ukbb.pval).toExponential(1) + '</span>':"NA" ) +
+            return '<tr class="gene_func_var_tab"> <tr> <td class="gene_func_var_row" width="100px"> '  +  (pheno.matching_results.ukbb ? "OR ": "")  + (pheno.matching_results.ukbb ?  _.template($('#beta-template-dir').html())({assoc:pheno.matching_results.ukbb}) + Math.exp(pheno.matching_results.ukbb.beta).toPrecision(2) + '<br> <span>p-val:' + Number(pheno.matching_results.ukbb.pval).toExponential(1) + '</span>':"NA" ) +
                 ' </td> </tr>'
 	    }).join(" ") %>
         </table>
