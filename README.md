@@ -20,8 +20,8 @@ Alternatively if direct access available change url with `--cromwell_url yourURL
 
 docker needs nfs-common
 
-`apt-get update
-apt-get install nfs-common`
+```apt-get update
+apt-get install nfs-common```
 
 When running docker it needs `--cap-add sys_admin`
 
