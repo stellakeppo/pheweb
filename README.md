@@ -15,6 +15,54 @@ Example proxy creation if cromwell runs in google VM: `gcloud compute ssh cromwe
 
 Alternatively if direct access available change url with `--cromwell_url yourURL` and remove proxy (--socks_proxy "")
 
+
+## Mounting NFS to copy directly from import task (WIP)
+
+docker needs nfs-common
+
+`apt-get update
+apt-get install nfs-common`
+
+When running docker it needs `--cap-add sys_admin`
+
+Cromwell has this option well hidden and its part of Google pipelines API. See enable fuse here: (https://cloud.google.com/life-sciences/docs/reference/rest/v2beta/projects.locations.pipelines/run) 
+
+Then create mount directory and mount
+
+`
+mkdir -p /mnt/nfs
+mount 10.233.113.218:/vol1 /mnt/fs`
+
+Running the previous within docker in a VM in the same project
+`
+mount.nfs: timeout set for Fri Jan 29 18:15:01 2021
+mount.nfs: trying text-based options 'vers=4.2,addr=10.233.113.218,clientaddr=172.17.0.2'
+mount.nfs: mount(2): Permission denied
+mount.nfs: access denied by server while mounting 10.233.113.218:/vol1
+`
+
+Running in the same VM outside docker it is successfull:
+
+`sudo mount 10.233.113.218:/vol1 /mnt/nfs/ -vvv
+mount.nfs: timeout set for Fri Jan 29 18:11:42 2021
+mount.nfs: trying text-based options 'vers=4.2,addr=10.233.113.218,clientaddr=10.132.15.195'
+mount.nfs: mount(2): Protocol not supported
+mount.nfs: trying text-based options 'vers=4.1,addr=10.233.113.218,clientaddr=10.132.15.195'
+mount.nfs: mount(2): Protocol not supported
+mount.nfs: trying text-based options 'vers=4.0,addr=10.233.113.218,clientaddr=10.132.15.195'
+mount.nfs: mount(2): Protocol not supported
+mount.nfs: trying text-based options 'addr=10.233.113.218'
+mount.nfs: prog 100003, trying vers=3, prot=6
+mount.nfs: trying 10.233.113.218 prog 100003 vers 3 prot TCP port 2049
+mount.nfs: prog 100005, trying vers=3, prot=17
+mount.nfs: trying 10.233.113.218 prog 100005 vers 3 prot UDP port 2050
+mount.nfs: portmap query retrying: RPC: Timed out
+mount.nfs: prog 100005, trying vers=3, prot=6
+mount.nfs: trying 10.233.113.218 prog 100005 vers 3 prot TCP port 2050`
+
+TODO: FIGURE OUT!!
+
+
 ## Copy
 
 # Deploying PheWeb in Google Cloud using Kubernetes
