@@ -104,8 +104,9 @@ def VariantFileReader(filepath, only_per_variant_fields=False):
     with open(filepath, 'rt') as f:
         reader = csv.reader(f, dialect='pheweb-internal-dialect')
         fields = next(reader)
-        for field in fields:
-            assert field in conf.parse.per_variant_fields or field in conf.parse.per_assoc_fields,f'{field} not found'
+        # TODO : mwm1 : strict flag
+        # for field in fields:
+        #     assert field in conf.parse.per_variant_fields or field in conf.parse.per_assoc_fields,f'{field} not found'
         if only_per_variant_fields:
             yield _vfr_only_per_variant_fields(fields, reader)
         else:
@@ -117,7 +118,7 @@ class _vfr:
     def __iter__(self):
         return self._get_variants()
     def _get_variants(self):
-        parsers = [conf.parse.fields[field]['_read'] for field in self.fields]
+        parsers = [ conf.parse.fields[field]['_read'] if field in conf.parse.fields else (lambda x :x)  for field in self.fields]
         for unparsed_variant in self._reader:
             assert len(unparsed_variant) == len(self.fields)
             variant = {field: parser(value) for parser,field,value in zip(parsers, self.fields, unparsed_variant)}
@@ -125,7 +126,7 @@ class _vfr:
 class _vfr_only_per_variant_fields:
     def __init__(self, fields, reader):
         self._all_fields = fields
-        self._extractors = [(conf.parse.fields[field]['_read'], field, colidx) for colidx,field in enumerate(fields) if field in conf.parse.per_variant_fields]
+        self._extractors = [(conf.parse.fields[field]['_read'] if field in conf.parse.fields else (lambda x :x), field, colidx) for colidx,field in enumerate(fields) if field in conf.parse.per_variant_fields]
         self.fields = [e[1] for e in self._extractors]
         self._reader = reader
     def __iter__(self):
@@ -332,9 +333,10 @@ class _vfw:
                 if field in variant: fields.append(field)
             extra_fields = list(set(variant.keys()) - set(fields))
             if extra_fields:
-                if not self._allow_extra_fields:
-                    raise PheWebError("ERROR: found unexpected fields {!r} among the expected fields {!r} while writing {!r}.".format(
-                                    extra_fields, fields, self._filepath))
+                # TODO : mwm1 : flag
+                #if not self._allow_extra_fields:
+                #    raise PheWebError("ERROR: found unexpected fields {!r} among the expected fields {!r} while writing {!r}.".format(
+                #                    extra_fields, fields, self._filepath))
                 fields += extra_fields
             self._writer = csv.DictWriter(self._f, fieldnames=fields, dialect='pheweb-internal-dialect')
             self._writer.writeheader()

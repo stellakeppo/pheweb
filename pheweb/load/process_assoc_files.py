@@ -20,7 +20,9 @@ matrix
 bgzip_phenos
 top_hits
 gather_pvalues_for_each_gene
+map_fields
 '''.split('\n')
+print(scripts)
 scripts = [script for script in scripts if script]
 
 def run(argv):
