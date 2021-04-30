@@ -52,6 +52,8 @@ const truncateString = (s,l) => {
     return s.split(";").length > l ? s.split(";").slice(0,l).join(";")+"...": s
 }
 
+const optionalFloat = (props) =>  isNaN(+props.value) ? 'NA' : props.value.toPrecision(3)
+
 const regionBuilder = (s,r) => {
     const tmp = s.replace("chr23","chrX").replace("chr","").split("_")
     const chr=tmp[0]
@@ -294,6 +296,7 @@ const phenoTableCols = {'GBMA': [...phenoTableCommonCols[0], ...phenoTableCommon
     Cell: props => props.value.toPrecision(3),
     minWidth: 110
 }, ...phenoTableCommonCols[1],
+   ...(window.show_ukbb == 'True' ?[
 {
     Header: () => (<span title="UKBB Neale lab result" style={{textDecoration: 'underline'}}>UKBB</span>),
     accessor: 'UKBB',
@@ -302,7 +305,9 @@ const phenoTableCols = {'GBMA': [...phenoTableCommonCols[0], ...phenoTableCommon
 					       (Number(props.original.ukbb.beta) < 0) ? <span style={{color: 'red', float: 'left', paddingRight: '5px'}} className="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span> :
 					       <span></span>} {Number(props.original.ukbb.pval).toExponential(1)}</div> : 'NA',
     minWidth: 110
-}],
+}					
+       ]:[])				    
+],
 'FINNGEN_QUANT': [...phenoTableCommonCols[0],{
     Header: () => (<span title="INFO score in FinnGen" style={{textDecoration: 'underline'}}>INFO FG</span>),
     accessor: 'info',
@@ -446,15 +451,17 @@ const csTableCols = [{
     sortMethod: stringToCountSorter,
     Cell: props => <div><span title={props.value}>{props.value.split(";").filter(x=>x!=="NA").length}</span></div>,
     minWidth: 60,
-}, {
-    Header: () => (<span title="UKBB Neale lab result" style={{textDecoration: 'underline'}}>UKBB</span>),
-    accessor: 'ukbb_pval',
-    sortMethod: naSorter,
-    Cell: props => props.value != "NA" ? <div>{(Number(props.original.ukbb_beta) >= 0) ? <span style={{color: 'green', float: 'left', paddingRight: '5px'}} className="glyphicon glyphicon-triangle-top" aria-hidden="true"></span> :
-					       (Number(props.original.ukbb_beta) < 0) ? <span style={{color: 'red', float: 'left', paddingRight: '5px'}} className="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span> :
+},
+    ...(window.show_ukbb == 'True' ?[
+    { Header: () => (<span title="UKBB Neale lab result" style={{textDecoration: 'underline'}}>UKBB</span>),
+      accessor: 'ukbb_pval',
+      sortMethod: naSorter,
+      Cell: props => props.value != "NA" ? <div>{(Number(props.original.ukbb_beta) >= 0) ? <span style={{color: 'green', float: 'left', paddingRight: '5px'}} className="glyphicon glyphicon-triangle-top" aria-hidden="true"></span> :
+	 				         (Number(props.original.ukbb_beta) < 0) ? <span style={{color: 'red', float: 'left', paddingRight: '5px'}} className="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span> :
 					       <span></span>} {Number(props.value).toExponential(1)}</div> : props.value,
-    minWidth: 60,
-}
+      minWidth: 60 }
+    ]:[])
+		     
 
 ]
 
@@ -494,36 +501,36 @@ minWidth: 50,
 Header: () => (<span title="alternate allele frequency (alt. af)" style={{textDecoration: 'underline'}}>alt af</span>),
 accessor: 'af_alt',
 filterMethod: (filter, row) => Math.abs(row[filter.id]) < +filter.value,
-Cell: props => props.value.toPrecision(3),
+    Cell: optionalFloat ,
 minWidth: 40,
 }, {
 Header: () => (<span title="alt. af (cases)" style={{textDecoration: 'underline'}}>alt af (cases)</span>),
 accessor: 'af_alt_cases',
 filterMethod: (filter, row) => Math.abs(row[filter.id]) < +filter.value,
-Cell: props => props.value.toPrecision(3),
+Cell: optionalFloat ,
 minWidth: 40,
 }, {
 Header: () => (<span title="alt. af (controls)" style={{textDecoration: 'underline'}}>alt af (controls)</span>),
 accessor: 'af_alt_controls',
 filterMethod: (filter, row) => Math.abs(row[filter.id]) < +filter.value,
-Cell: props => props.value.toPrecision(3),
+Cell: optionalFloat,
 minWidth: 40,
 }, {
 Header: () => (<span title="INFO" style={{textDecoration: 'underline'}}>INFO</span>),
 accessor: 'INFO',
 filterMethod: (filter, row) => Math.abs(row[filter.id]) < +filter.value,
-Cell: props => props.value.toPrecision(3),
+Cell: optionalFloat,
 minWidth: 40,
 }, {
 Header: () => (<span title="Finnish Enrichment" style={{textDecoration: 'underline'}}>Finnish enrichment</span>),
 accessor: 'enrichment_nfsee',
 filterMethod: (filter, row) => Math.abs(row[filter.id]) < +filter.value,
-Cell: props => props.value.toPrecision(3),
+Cell: optionalFloat ,
 minWidth: 50,
 }, {
 Header: () => (<span title="Credible set PIP" style={{textDecoration: 'underline'}}>CS PIP</span>),
 accessor: 'cs_prob',
-Cell: props => props.value.toPrecision(3),
+Cell: optionalFloat ,
 minWidth: 40
 }, {
 Header: () => (<span title="Functional Category" style={{textDecoration: 'underline'}}>Functional variant</span>),
@@ -588,7 +595,7 @@ const lofTableCols = [{
     accessor: 'beta',
     minWidth: 70,
     filterMethod: (filter, row) => Math.abs(row[filter.id]) > filter.value,
-    Cell: props => props.value.toPrecision(3)
+    Cell: optionalFloat,
 }, {
     Header: () => (<span title="reference allele count in cases" style={{textDecoration: 'underline'}}>ref cases</span>),
     accessor: 'ref_count_cases',

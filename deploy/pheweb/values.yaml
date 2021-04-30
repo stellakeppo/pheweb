@@ -1,0 +1,11 @@
+image: # pheweb image
+  repository: gcr.io/phewas-development/pheweb
+  pullPolicy: IfNotPresent
+  tag: ci-bc3e2881d43ad7ff4c2820c58a68bbaf128a0d60
+
+service:
+  type: NodePort
+  port: 80
+
+persistentVolume:
+  storage: 11T
