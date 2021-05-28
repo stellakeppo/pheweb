@@ -62,128 +62,127 @@ const regionBuilder = (s,r) => {
     return `${chr}:${pos_min}-${pos_max}`
 }
 
-const phenolistTableCols = {'FINNGEN': [{
-    Header: () => (<span title="phenotype" style={{textDecoration: 'underline'}}>phenotype</span>),
-    accessor: 'phenostring',
-    Cell: props => (<a href={"/pheno/" + props.original.phenocode} target="_blank">{props.value}</a>),
-    minWidth: 300
-}, {
-    Header: () => (<span title="Risteys link" style={{textDecoration: 'underline'}}>Risteys</span>),
-    accessor: 'phenocode',
-    Cell: props => (<a style={{fontSize:'1.25rem', padding: '.25rem .5rem', backgroundColor: '#2779bd', color: '#fff', borderRadius: '.25rem', fontWeight: '700', boxShadow: '0 0 5px rgba(0,0,0,.5)'}} href={'https://risteys.finngen.fi/phenocode/' + props.value.replace('_EXALLC', '').replace('_EXMORE', '')}>RISTEYS</a>),
-    Filter: ({ filter, onChange }) => null,
-    minWidth: 50
-}, {
-    Header: () => (<span title="phenotype category" style={{textDecoration: 'underline'}}>category</span>),
-    accessor: 'category',
-    Cell: props => props.value,
-    minWidth: 200
-},{
-    Header: () => (<span title="number of cases" style={{textDecoration: 'underline'}}>number of cases</span>),
-    accessor: 'num_cases',
-    Cell: props => props.value,
-    filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
-    minWidth: 50,
-},{
-    Header: () => (<span title={`number of cases ${window.release_prev}`} style={{textDecoration: 'underline'}}>{`number of cases ${window.release_prev}`}</span>),
-    accessor: 'num_cases_prev',
-    Cell: props => props.value,
-    filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
-    minWidth: 50,
-},{
-    Header: () => (<span title="number of controls" style={{textDecoration: 'underline'}}>number of controls</span>),
-    accessor: 'num_controls',
-    Cell: props => props.value,
-    filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
-    minWidth: 50,
-},{
-    Header: () => (<span title="number of genome-wide significant hits" style={{textDecoration: 'underline'}}>genome-wide sig loci</span>),
-    accessor: 'num_gw_significant',
-    Cell: props => props.value,
-    filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
-    minWidth: 50,
-},{
-    Header: () => (<span title={`number of genome-wide significant hits ${window.release_prev}`} style={{textDecoration: 'underline'}}>{`genome-wide sig loci ${window.release_prev}`}</span>),
-    accessor: 'num_gw_significant_prev',
-    Cell: props => props.value,
-    filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
-    minWidth: 50,
-},{
-    Header: () => (<span title="genomic control lambda 0.5" style={{textDecoration: 'underline'}}>genomic control lambda</span>),
-    accessor: 'lambda',
-    Cell: props => props.value,
-    filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
-    minWidth: 50,
-}], 'FINNGEN_QUANT': [{
-    Header: () => (<span title="phenotype" style={{textDecoration: 'underline'}}>phenotype</span>),
-    accessor: 'phenostring',
-    Cell: props => (<a href={"/pheno/" + props.original.phenocode} target="_blank">{props.value}</a>),
-    minWidth: 200
-}, {
-    Header: () => (<span title="ATC code" style={{textDecoration: 'underline'}}>ATC code</span>),
-    accessor: 'atc',
-    Cell: props => (<a href={"https://www.whocc.no/atc_ddd_index/?code=" + props.value} target="_blank">{props.value}</a>),
-    minWidth: 200
-},{
-    Header: () => (<span title="number of samples" style={{textDecoration: 'underline'}}>number of individuals with >0 purchases</span>),
-    accessor: 'num_samples',
-    Cell: props => props.value,
-    filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
-    minWidth: 100,
-},{
-    Header: () => (<span title="number of purchases" style={{textDecoration: 'underline'}}>number of purchases</span>),
-    accessor: 'num_events',
-    Cell: props => props.value,
-    filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
-    minWidth: 100,
-},{
-    Header: () => (<span title="number of genome-wide significant hits" style={{textDecoration: 'underline'}}>genome-wide sig loci</span>),
-    accessor: 'num_gw_significant',
-    Cell: props => props.value,
-    filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
-    minWidth: 100,
-},{
-    Header: () => (<span title="genomic control lambda 0.5" style={{textDecoration: 'underline'}}>genomic control lambda</span>),
-    accessor: 'lambda',
-    Cell: props => props.value,
-    filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
-    minWidth: 100,
-}], 'GBMA': [{
-    Header: () => (<span title="phenotype" style={{textDecoration: 'underline'}}>phenotype</span>),
-    accessor: 'phenostring',
-    Cell: props => (<a href={"/pheno/" + props.original.phenocode} target="_blank">{props.value}</a>),
-    minWidth: 300
-},{
-    Header: () => (<span title="number of cases" style={{textDecoration: 'underline'}}>number of cases</span>),
-    accessor: 'num_cases',
-    Cell: props => props.value,
-    filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
-    minWidth: 50,
-},{
-    Header: () => (<span title="number of controls" style={{textDecoration: 'underline'}}>number of controls</span>),
-    accessor: 'num_controls',
-    Cell: props => props.value,
-    filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
-    minWidth: 50,
-},{
-    Header: () => (<span title="number of genome-wide significant hits" style={{textDecoration: 'underline'}}>genome-wide sig loci</span>),
-    accessor: 'num_gw_significant',
-    Cell: props => props.value,
-    filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
-    minWidth: 50,
-},{
-    Header: () => (<span title="genomic control lambda 0.5" style={{textDecoration: 'underline'}}>genomic control lambda</span>),
-    accessor: 'lambda',
-    Cell: props => props.value,
-    filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
-    minWidth: 50
-},{
-    Header: () => (<span title="number of cohorts" style={{textDecoration: 'underline'}}>n cohorts</span>),
-    accessor: 'cohorts',
-    Cell: props => +props.value.length,
-    filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
-    minWidth: 50
-}]}
+const phenoColumn = {
+    phenotype : { Header: () => (<span title="phenotype" style={{textDecoration: 'underline'}}>phenotype</span>),
+		  accessor: 'phenostring',
+		  Cell: props => (<a href={"/pheno/" + props.original.phenocode} target="_blank">{props.value}</a>),
+		  minWidth: 300 },
+    risteysLink : { Header: () => (<span title="Risteys link" style={{textDecoration: 'underline'}}>Risteys</span>),
+                    accessor: 'phenocode',
+                    Cell: props => (<a style={{fontSize:'1.25rem',
+                                               padding: '.25rem .5rem',
+                                               backgroundColor: '#2779bd',
+                                               color: '#fff',
+                                               borderRadius: '.25rem',
+                                               fontWeight: '700',
+                                               boxShadow: '0 0 5px rgba(0,0,0,.5)'}}
+                                    href={'https://risteys.finngen.fi/phenocode/' + props.value.replace('_EXALLC', '').replace('_EXMORE', '')}>RISTEYS</a>),
+                    Filter: ({ filter, onChange }) => null,
+                    minWidth: 50 },
+    
+    category : { Header: () => (<span title="phenotype category"
+				      style={{textDecoration: 'underline'}}>category</span>),
+		 accessor: 'category',
+		 Cell: props => props.value,
+		 minWidth: 200 },
+    
+    numCases : { Header: () => (<span title="number of cases"
+				      style={{textDecoration: 'underline'}}>number of cases</span>),
+		 accessor: 'num_cases',
+		 Cell: props => props.value,
+		 filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
+		 minWidth: 50 },
+
+    columnCasesPrev : { Header: () => (<span title={`number of cases ${window.release_prev}`}
+				             style={{textDecoration: 'underline'}}>{`number of cases ${window.release_prev}`}</span>),
+			accessor: 'num_cases_prev',
+			Cell: props => props.value,
+			filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
+			minWidth: 50 },
+    
+    numControls : { Header: () => (<span title="number of controls" style={{textDecoration: 'underline'}}>number of controls</span>),
+		    accessor: 'num_controls',
+		    Cell: props => props.value,
+		    filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
+		    minWidth: 50 },
+
+    numGwSignificant : { Header: () => (<span title="number of genome-wide significant hits"
+					      style={{textDecoration: 'underline'}}>genome-wide sig loci</span>),
+			 accessor: 'num_gw_significant',
+			 Cell: props => props.value,
+			 filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
+			 minWidth: 50 },
+
+    numGwSignificantPrev : { Header: () => (<span title={`number of genome-wide significant hits ${window.release_prev}`}
+					          style={{textDecoration: 'underline'}}>{`genome-wide sig loci ${window.release_prev}`}</span>),
+			     accessor: 'num_gw_significant_prev',
+			     Cell: props => props.value,
+			     filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
+			     minWidth: 50 },
+
+    controlLambda : { Header: () => (<span title="genomic control lambda 0.5"
+				           style={{textDecoration: 'underline'}}>genomic control lambda</span>),
+		      accessor: 'lambda',
+		      Cell: props => props.value,
+		      filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
+		      minWidth: 50 },
+
+    ATCCode : { Header: () => (<span title="ATC code" style={{textDecoration: 'underline'}}>ATC code</span>),
+		accessor: 'atc',
+		Cell: props => (<a href={"https://www.whocc.no/atc_ddd_index/?code=" + props.value} target="_blank">{props.value}</a>),
+		minWidth: 200 },
+    
+    numSamples : { Header: () => (<span title="number of samples" style={{textDecoration: 'underline'}}>number of individuals with >0 purchases</span>),
+		   accessor: 'num_samples',
+		   Cell: props => props.value,
+		   filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
+		   minWidth: 100 },
+    numEvents : { Header: () => (<span title="number of purchases" style={{textDecoration: 'underline'}}>number of purchases</span>),
+		  accessor: 'num_events',
+		  Cell: props => props.value,
+		  filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
+		  minWidth: 100 },
+    
+    cohorts : { Header: () => (<span title="number of cohorts" style={{textDecoration: 'underline'}}>n cohorts</span>),
+		accessor: 'cohorts',
+		Cell: props => +props.value.length,
+		filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
+		minWidth: 50
+	    }
+}
+
+
+const phenolistTableCols =
+      { 'EXTENSION' : [
+	  phenoColumn.phenotype ,
+	  phenoColumn.category
+        ],
+	'FINNGEN': [
+	    phenoColumn.phenotype,
+	    phenoColumn.risteysLink,
+	    phenoColumn.category,
+	    phenoColumn.numCases,
+	    phenoColumn.casesPrev,
+	    phenoColumn.numControls,
+	    phenoColumn.numGwSignificant,
+	    phenoColumn.numGwSignificantPrev,
+	    phenoColumn.controlLambda ],
+	'FINNGEN_QUANT': [
+	    { ... phenoColumn.phenotype , minWidth: 200 },
+	    phenoColumn.ATCCode,
+	    phenoColumn.numSamples,
+	    phenoColumn.numEvents,
+	    { ... phenoColumn.numGwSignificant , minWidth: 100 },
+	    { ... phenoColumn.ATCCode, minWidth: 100 }],
+	'GBMA': [
+	    phenoColumn.phenotype,
+	    phenoColumn.numCases,
+	    phenoColumn.numControls,
+	    phenoColumn.numGwSignificant,
+	    phenoColumn.controlLambda,
+	    phenoColumn.cohorts
+	]
+      }
 
 const phenoTableCommonCols = [[{
     Header: () => (<span title="chromosome" style={{textDecoration: 'underline'}}>chr</span>),
@@ -246,134 +245,186 @@ const phenoTableCommonCols = [[{
     minWidth: 80
 }]]
 
-const phenoTableCols = {'GBMA': [...phenoTableCommonCols[0], ...phenoTableCommonCols[1], {
-    Header: () => (<span title="allele frequency in UKBB" style={{textDecoration: 'underline'}}>af ukbb</span>),
-    accessor: 'maf',
-    filterMethod: (filter, row) => row[filter.id] < +filter.value,
-    Cell: props => (props.value == 'NA' || props.value == '') ? 'NA' : props.value.toPrecision(3),
-    minWidth: 110
-}, {
-    Header: () => (<span title="number of cohorts" style={{textDecoration: 'underline'}}>n cohorts</span>),
-    accessor: 'n_cohorts',
-    filterMethod: (filter, row) => row[filter.id] >= +filter.value,
-    Cell: props => +props.value,
-    minWidth: 80
-}],
-			'FINNGEN': [...phenoTableCommonCols[0],{
-    Header: () => (<span title="INFO score" style={{textDecoration: 'underline'}}>INFO</span>),
-    accessor: 'info',
-    filterMethod: (filter, row) => row[filter.id] >= +filter.value,
-    Cell: props => isNaN(+props.value) ? 'NA' : props.value.toPrecision(3),
-    minWidth: 80
-}, {
-    Header: () => (<span title="AF enrichment FIN / Non-Finnish-non-Estonian European" style={{textDecoration: 'underline'}}>FIN enrichment</span>),
-    accessor: 'fin_enrichment',
-    filterMethod: (filter, row) => row[filter.id] > +filter.value,
-    Cell: props => {
-	return isNaN(+props.value) ? '' :
-	    <div style={{color: +props.value > 5 ? 'rgb(25,128,5,1)'
- 			 : 'inherit'}}>
-	    {props.value == 1e6 ? 'inf' : props.value == -1 ? 'NA' : Number(props.value).toPrecision(3)}
-	</div>
-    },
-    minWidth: 120
-}, {
-    Header: () => (<span title="allele frequency" style={{textDecoration: 'underline'}}>af</span>),
-    accessor: 'maf',
-    filterMethod: (filter, row) => row[filter.id] < +filter.value,
-    Cell: props => props.value.toPrecision(3),
-    minWidth: 110
-}, {
-    Header: () => (<span title="allele frequency in cases" style={{textDecoration: 'underline'}}>af cases</span>),
-    accessor: 'maf_cases',
-    filterMethod: (filter, row) => row[filter.id] < +filter.value,
-    Cell: props => props.value.toPrecision(3),
-    minWidth: 110
-}, {
-    Header: () => (<span title="allele frequency in controls" style={{textDecoration: 'underline'}}>af controls</span>),
-    accessor: 'maf_controls',
-    filterMethod: (filter, row) => row[filter.id] < +filter.value,
-    Cell: props => props.value.toPrecision(3),
-    minWidth: 110
-}, ...phenoTableCommonCols[1],
-   ...(window.show_ukbb == 'True' ?[
-{
-    Header: () => (<span title="UKBB Neale lab result" style={{textDecoration: 'underline'}}>UKBB</span>),
-    accessor: 'UKBB',
-    filterMethod: (filter, row) => row[filter.id] < +filter.value,
-    Cell: props => props.original.ukbb ? <div>{(Number(props.original.ukbb.beta) >= 0) ? <span style={{color: 'green', float: 'left', paddingRight: '5px'}} className="glyphicon glyphicon-triangle-top" aria-hidden="true"></span> :
-					       (Number(props.original.ukbb.beta) < 0) ? <span style={{color: 'red', float: 'left', paddingRight: '5px'}} className="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span> :
-					       <span></span>} {Number(props.original.ukbb.pval).toExponential(1)}</div> : 'NA',
-    minWidth: 110
-}					
-       ]:[])				    
-],
-'FINNGEN_QUANT': [...phenoTableCommonCols[0],{
-    Header: () => (<span title="INFO score in FinnGen" style={{textDecoration: 'underline'}}>INFO FG</span>),
-    accessor: 'info',
-    filterMethod: (filter, row) => row[filter.id] >= +filter.value,
-    Cell: props => isNaN(+props.value) ? 'NA' : props.value.toPrecision(3),
-    minWidth: 80
-}, {
-    Header: () => (<span title="AF enrichment FIN / Non-Finnish-non-Estonian European" style={{textDecoration: 'underline'}}>FIN enrichment</span>),
-    accessor: 'fin_enrichment',
-    filterMethod: (filter, row) => row[filter.id] > +filter.value,
-    Cell: props => {
-	return isNaN(+props.value) ? '' :
-	    <div style={{color: +props.value > 5 ? 'rgb(25,128,5,1)'
- 			 : 'inherit'}}>
-	    {props.value == 1e6 ? 'inf' : props.value == -1 ? 'NA' : Number(props.value).toPrecision(3)}
-	</div>
-    },
-    minWidth: 120
-}, {
-    Header: () => (<span title="allele frequency" style={{textDecoration: 'underline'}}>af</span>),
-    accessor: 'maf',
-    filterMethod: (filter, row) => {
-	return filter.value.startsWith('>') ?
-	    row[filter.id] > +(filter.value.substring(1)) :
-	    row[filter.id] < +(filter.value.replace('<', ''))
-    },
-    Cell: props => props.value.toPrecision(3),
-    minWidth: 110
-}, ...phenoTableCommonCols[1]],			
-    'FINNGEN_UKB': [...phenoTableCommonCols[0],{
-    Header: () => (<span title="INFO score in FinnGen" style={{textDecoration: 'underline'}}>INFO FG</span>),
-    accessor: 'info',
-    filterMethod: (filter, row) => row[filter.id] >= +filter.value,
-    Cell: props => isNaN(+props.value) ? 'NA' : props.value.toPrecision(3),
-    minWidth: 80
-}, {
-    Header: () => (<span title="AF enrichment FIN / Non-Finnish-non-Estonian European" style={{textDecoration: 'underline'}}>FIN enrichment</span>),
-    accessor: 'fin_enrichment',
-    filterMethod: (filter, row) => row[filter.id] > +filter.value,
-    Cell: props => {
-	return isNaN(+props.value) ? '' :
-	    <div style={{color: +props.value > 5 ? 'rgb(25,128,5,1)'
- 			 : 'inherit'}}>
-	    {props.value == 1e6 ? 'inf' : props.value == -1 ? 'NA' : Number(props.value).toPrecision(3)}
-	</div>
-    },
-    minWidth: 120
-}, {
-    Header: () => (<span title="allele frequency in UKBB" style={{textDecoration: 'underline'}}>af UKBB</span>),
-    accessor: 'maf',
-    filterMethod: (filter, row) => row[filter.id] < +filter.value,
-    Cell: props => props.value.toPrecision(3),
-    minWidth: 110
-}, {
-    Header: () => (<span title="allele frequency in FinnGen cases" style={{textDecoration: 'underline'}}>af cases FG</span>),
-    accessor: 'maf_cases',
-    filterMethod: (filter, row) => row[filter.id] < +filter.value,
-    Cell: props => props.value.toPrecision(3),
-    minWidth: 110
-}, {
-    Header: () => (<span title="allele frequency in FinnGen controls" style={{textDecoration: 'underline'}}>af controls FG</span>),
-    accessor: 'maf_controls',
-    filterMethod: (filter, row) => row[filter.id] < +filter.value,
-    Cell: props => props.value.toPrecision(3),
-    minWidth: 110
-}, ...phenoTableCommonCols[1]]}
+const phenoTableCols = {
+    'EXTENSION' : [ ...phenoTableCommonCols[0],
+		    ...phenoTableCommonCols[1],
+		    /* FINNGEN_beta:"FG OR" */
+ 		    { Header: () => (<span title="FG OR" style={{textDecoration: 'underline'}}>FG OR</span>),
+		      accessor: 'FINNGEN_beta',
+		      filterMethod: (filter, row) => row[filter.id] >= +filter.value,
+		      Cell: props => +props.value,
+		      minWidth: 40
+		    },
+		    
+		    /* FINNGEN_pval:"FG p-value" */
+ 		    { Header: () => (<span title="FG p-value" style={{textDecoration: 'underline'}}>FG p-value</span>),
+		      accessor: 'FINNGEN_pval',
+		      filterMethod: (filter, row) => row[filter.id] >= +filter.value,
+		      Cell: props => +props.value,
+		      minWidth: 40
+		    },
+		    /* FINNGEN_af_alt_controls:"FG af" */
+ 		    { Header: () => (<span title="FG af" style={{textDecoration: 'underline'}}>FG af</span>),
+		      accessor: 'FINNGEN_af_alt_controls',
+		      filterMethod: (filter, row) => row[filter.id] >= +filter.value,
+		      Cell: props => +props.value,
+		      minWidth: 40
+		    },
+
+		    /* UKBB_beta:"UKBB OR" */
+ 		    { Header: () => (<span title="UKBB OR" style={{textDecoration: 'underline'}}>UKBB OR</span>),
+		      accessor: 'UKBB_beta',
+		      filterMethod: (filter, row) => row[filter.id] >= +filter.value,
+		      Cell: props => +props.value,
+		      minWidth: 40
+		    },
+		    
+		    /* UKBB_pval:"UKBB p-value */
+ 		    { Header: () => (<span title="UKBB p-value" style={{textDecoration: 'underline'}}>UKBB p-value</span>),
+		      accessor: 'UKBB_pval',
+		      filterMethod: (filter, row) => row[filter.id] >= +filter.value,
+		      Cell: props => +props.value,
+		      minWidth: 40
+		    },
+
+		    
+		    /* all_inv_var_het_p:"heterogeneity p-value */
+ 		    { Header: () => (<span title="heterogeneity p-value" style={{textDecoration: 'underline'}}>heterogeneity p-value</span>),
+		      accessor: 'all_inv_var_het_p',
+		      filterMethod: (filter, row) => row[filter.id] >= +filter.value,
+		      Cell: props => +props.value,
+		      minWidth: 40
+		    }
+		    
+		  ],
+    'GBMA': [...phenoTableCommonCols[0],
+	     ...phenoTableCommonCols[1],
+	     { Header: () => (<span title="allele frequency in UKBB" style={{textDecoration: 'underline'}}>af ukbb</span>),
+	       accessor: 'maf',
+	       filterMethod: (filter, row) => row[filter.id] < +filter.value,
+	       Cell: props => (props.value == 'NA' || props.value == '') ? 'NA' : props.value.toPrecision(3),
+	       minWidth: 110
+	     },
+	     { Header: () => (<span title="number of cohorts" style={{textDecoration: 'underline'}}>n cohorts</span>),
+	       accessor: 'n_cohorts',
+	       filterMethod: (filter, row) => row[filter.id] >= +filter.value,
+	       Cell: props => +props.value,
+	       minWidth: 80
+	     }],
+    'FINNGEN': [...phenoTableCommonCols[0],
+		{ Header: () => (<span title="INFO score" style={{textDecoration: 'underline'}}>INFO</span>),
+		  accessor: 'info',
+		  filterMethod: (filter, row) => row[filter.id] >= +filter.value,
+		  Cell: props => isNaN(+props.value) ? 'NA' : props.value.toPrecision(3),
+		  minWidth: 80
+		},
+		{ Header: () => (<span title="AF enrichment FIN / Non-Finnish-non-Estonian European" style={{textDecoration: 'underline'}}>FIN enrichment</span>),
+		  accessor: 'fin_enrichment',
+		  filterMethod: (filter, row) => row[filter.id] > +filter.value,
+		  Cell: props => { return isNaN(+props.value) ? '' :
+				   <div style={{color: +props.value > 5 ? 'rgb(25,128,5,1)'
+ 						: 'inherit'}}>
+				   {props.value == 1e6 ? 'inf' : props.value == -1 ? 'NA' : Number(props.value).toPrecision(3)}
+				   </div>
+				 },
+		  minWidth: 120
+		},
+		{ Header: () => (<span title="allele frequency" style={{textDecoration: 'underline'}}>af</span>),
+		  accessor: 'maf',
+		  filterMethod: (filter, row) => row[filter.id] < +filter.value,
+		  Cell: props => props.value.toPrecision(3),
+		  minWidth: 110
+		},
+		{ Header: () => (<span title="allele frequency in cases" style={{textDecoration: 'underline'}}>af cases</span>),
+		  accessor: 'maf_cases',
+		  filterMethod: (filter, row) => row[filter.id] < +filter.value,
+		  Cell: props => props.value.toPrecision(3),
+		  minWidth: 110
+		},
+		{ Header: () => (<span title="allele frequency in controls" style={{textDecoration: 'underline'}}>af controls</span>),
+		  accessor: 'maf_controls',
+		  filterMethod: (filter, row) => row[filter.id] < +filter.value,
+		  Cell: props => props.value.toPrecision(3),
+		  minWidth: 110
+		},
+		...phenoTableCommonCols[1],
+		...(window.show_ukbb == 'True' ?[ { Header: () => (<span title="UKBB Neale lab result" style={{textDecoration: 'underline'}}>UKBB</span>),
+						    accessor: 'UKBB',
+						    filterMethod: (filter, row) => row[filter.id] < +filter.value,
+						    Cell: props => props.original.ukbb ? <div>{(Number(props.original.ukbb.beta) >= 0) ? <span style={{color: 'green', float: 'left', paddingRight: '5px'}} className="glyphicon glyphicon-triangle-top" aria-hidden="true"></span> :
+											       (Number(props.original.ukbb.beta) < 0) ? <span style={{color: 'red', float: 'left', paddingRight: '5px'}} className="glyphicon glyphicon-triangle-bottom" aria-hidden="true"></span> :
+											       <span></span>} {Number(props.original.ukbb.pval).toExponential(1)}</div> : 'NA',
+						    minWidth: 110
+						  }					
+						]:[])				    
+	       ],
+    'FINNGEN_QUANT': [...phenoTableCommonCols[0],
+		      { Header: () => (<span title="INFO score in FinnGen" style={{textDecoration: 'underline'}}>INFO FG</span>),
+			accessor: 'info',
+			filterMethod: (filter, row) => row[filter.id] >= +filter.value,
+			Cell: props => isNaN(+props.value) ? 'NA' : props.value.toPrecision(3),
+			minWidth: 80
+		      },
+		      { Header: () => (<span title="AF enrichment FIN / Non-Finnish-non-Estonian European" style={{textDecoration: 'underline'}}>FIN enrichment</span>),
+			accessor: 'fin_enrichment',
+			filterMethod: (filter, row) => row[filter.id] > +filter.value,
+			Cell: props => {
+			    return isNaN(+props.value) ? '' :
+				<div style={{color: +props.value > 5 ? 'rgb(25,128,5,1)'
+ 					     : 'inherit'}}>
+				{props.value == 1e6 ? 'inf' : props.value == -1 ? 'NA' : Number(props.value).toPrecision(3)}
+			    </div>
+			},
+			minWidth: 120
+		      },
+		      { Header: () => (<span title="allele frequency" style={{textDecoration: 'underline'}}>af</span>),
+			accessor: 'maf',
+			filterMethod: (filter, row) => {
+			    return filter.value.startsWith('>') ?
+				row[filter.id] > +(filter.value.substring(1)) :
+				row[filter.id] < +(filter.value.replace('<', ''))
+			},
+			Cell: props => props.value.toPrecision(3),
+			minWidth: 110
+		      }, ...phenoTableCommonCols[1]],			
+    'FINNGEN_UKB': [...phenoTableCommonCols[0],
+		    { Header: () => (<span title="INFO score in FinnGen" style={{textDecoration: 'underline'}}>INFO FG</span>),
+		      accessor: 'info',
+		      filterMethod: (filter, row) => row[filter.id] >= +filter.value,
+		      Cell: props => isNaN(+props.value) ? 'NA' : props.value.toPrecision(3),
+		      minWidth: 80
+		    },
+		    { Header: () => (<span title="AF enrichment FIN / Non-Finnish-non-Estonian European" style={{textDecoration: 'underline'}}>FIN enrichment</span>),
+		      accessor: 'fin_enrichment',
+		      filterMethod: (filter, row) => row[filter.id] > +filter.value,
+		      Cell: props => {
+			  return isNaN(+props.value) ? '' :
+			      <div style={{color: +props.value > 5 ? 'rgb(25,128,5,1)'
+ 					   : 'inherit'}}>
+			      {props.value == 1e6 ? 'inf' : props.value == -1 ? 'NA' : Number(props.value).toPrecision(3)}
+			  </div>
+		      },
+		      minWidth: 120
+		    },
+		    { Header: () => (<span title="allele frequency in UKBB" style={{textDecoration: 'underline'}}>af UKBB</span>),
+		      accessor: 'maf',
+		      filterMethod: (filter, row) => row[filter.id] < +filter.value,
+		      Cell: props => props.value.toPrecision(3),
+		      minWidth: 110
+		    },
+		    { Header: () => (<span title="allele frequency in FinnGen cases" style={{textDecoration: 'underline'}}>af cases FG</span>),
+		      accessor: 'maf_cases',
+		      filterMethod: (filter, row) => row[filter.id] < +filter.value,
+		      Cell: props => props.value.toPrecision(3),
+		      minWidth: 110
+		    },
+		    { Header: () => (<span title="allele frequency in FinnGen controls" style={{textDecoration: 'underline'}}>af controls FG</span>),
+		      accessor: 'maf_controls',
+		      filterMethod: (filter, row) => row[filter.id] < +filter.value,
+		      Cell: props => props.value.toPrecision(3),
+		      minWidth: 110
+		    }, ...phenoTableCommonCols[1]]
+}
 
 const csTableCols = [{
     Header: () => (<span title="variant with highest PIP in the credible set" style={{textDecoration: 'underline'}}>top PIP variant</span>),

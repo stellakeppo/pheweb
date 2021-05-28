@@ -141,14 +141,14 @@ class _vfr_only_per_variant_fields:
 @contextmanager
 def IndexedVariantFileReader(phenocode):
     filepath = common_filepaths['pheno_gz'](phenocode)
-
     with read_gzip(filepath) as f:
         reader = csv.reader(f, dialect='pheweb-internal-dialect')
         colnames = next(reader)
     assert colnames[0].startswith('#')
     colnames[0] = colnames[0][1:]
-    for field in colnames:
-        assert field in conf.parse.per_variant_fields or field in conf.parse.per_assoc_fields, (field)
+    # TODO mwm1
+    #for field in colnames:
+    #    assert field in conf.parse.per_variant_fields or field in conf.parse.per_assoc_fields, (field)
     colidxs = {field: colnum for colnum, field in enumerate(colnames)}
 
     with pysam.TabixFile(filepath, parser=None) as tabix_file:
@@ -162,7 +162,7 @@ class _ivfr:
         variant = {}
         for field in self._colidxs:
             val = variant_row[self._colidxs[field]]
-            parser = conf.parse.fields[field]['_read']
+            parser = conf.parse.fields[field]['_read'] if field in conf.parse.fields else lambda x : x
             try:
                 variant[field] = parser(val)
             except Exception as exc:

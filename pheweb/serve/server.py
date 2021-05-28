@@ -216,7 +216,12 @@ def variant_page(query):
         variantdat = jeeves.get_single_variant_data(v)
         if variantdat is None:
             die("Sorry, I couldn't find the variant {}".format(query))
+ 
         variantdat = (variantdat[0], [pheno for pheno in variantdat[1] if pheno.phenocode in use_phenos])
+        print(".variant............")
+        print([pheno for pheno in variantdat[1]])
+        print([ p for p in variantdat[1]])
+        print(".variant............")        
         regions = jeeves.get_finemapped_regions(v)
         if regions is not None:
             regions = [region for region in regions if region['phenocode'] in use_phenos]

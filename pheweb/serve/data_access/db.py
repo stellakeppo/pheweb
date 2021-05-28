@@ -101,7 +101,23 @@ class Variant(JSONifiable):
 
 class PhenoResult(JSONifiable):
 
-    def __init__(self, phenocode,phenostring, category_name, category_index, pval,beta, maf, maf_case,maf_control, n_case, n_control, n_sample=None):
+    def __init__(self,
+                 phenocode,
+                 phenostring,
+                 category_name,
+                 category_index,
+                 pval,
+                 beta,
+                 maf,
+                 maf_case,
+                 maf_control,
+                 n_case,
+                 n_control,
+                 n_sample = None,
+                 finngen_cases = None,
+                 finngen_controls = None,
+                 ukb_cases = None,
+                 ukb_controls = None):
         self.phenocode = phenocode
         self.phenostring = phenostring
         self.pval = float(pval) if pval is not None and pval!='NA' else None
@@ -119,7 +135,11 @@ class PhenoResult(JSONifiable):
              self.n_sample = n_case + n_control
         else:
              self.n_sample = n_sample
-
+        self.finngen_cases = finngen_cases
+        self.finngen_controls = finngen_controls
+        self.ukb_cases = ukb_cases
+        self.ukb_controls = ukb_controls
+        
     def add_matching_result(self, resultname, result):
         self.matching_results[resultname] = result
 
@@ -626,7 +646,6 @@ class TabixResultDao(ResultDB):
 
         result = []
         for variant_row in tabix_iter:
-
             split = variant_row.split('\t')
             chrom = split[0].replace("chr","").replace("X","23").replace("Y","24").replace("MT","25")
             v = Variant( chrom,split[1],split[2],split[3])
@@ -649,7 +668,11 @@ class TabixResultDao(ResultDB):
                                  pval, beta, maf, maf_case, maf_control,
                                  self.pheno_map[pheno[0]]['num_cases'] if 'num_cases' in self.pheno_map[pheno[0]] else 0,
                                  self.pheno_map[pheno[0]]['num_controls'] if 'num_controls' in self.pheno_map[pheno[0]] else 0,
-                                 self.pheno_map[pheno[0]]['num_samples'] if 'num_samples' in self.pheno_map[pheno[0]] else 'NA')
+                                 n_sample = self.pheno_map[pheno[0]]['num_samples'] if 'num_samples' in self.pheno_map[pheno[0]] else 'NA',
+                                 finngen_cases = self.pheno_map[pheno[0]]['finngen_cases'] if 'finngen_cases' in self.pheno_map[pheno[0]] else 'NA',
+                                 finngen_controls = self.pheno_map[pheno[0]]['finngen_controls'] if 'finngen_controls' in self.pheno_map[pheno[0]] else 'NA',
+                                 ukb_cases = self.pheno_map[pheno[0]]['ukb_cases'] if 'ukb_cases' in self.pheno_map[pheno[0]] else 'NA',
+                                 ukb_controls = self.pheno_map[pheno[0]]['ukb_controls'] if 'ukb_controls' in self.pheno_map[pheno[0]] else 'NA',)
                 phenores.append(pr)
             result.append((v,phenores))
         return result

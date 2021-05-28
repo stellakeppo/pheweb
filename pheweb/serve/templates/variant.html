@@ -114,6 +114,12 @@
           <th>UKBB</th>
           <th>UKBB N samples</th>
 	  {% endif %}
+	  {% if config.browser == 'EXTENSION' %}
+	  <th>FINNGEN cases</th>
+	  <th>FINNGEN controls</th>
+	  <th>UKB cases</th>
+	  <th>UKB controls</th>
+	  {% endif %}
         </tr>
       </thead>
       <tbody>
@@ -237,6 +243,14 @@ OR: <%= d.or.toExponential(1) %><br>
     <td style="width: 6%"> <%= (d.matching_results.ukbb?_.template($('#beta-template-dir').html())({assoc: d.matching_results.ukbb}):"NA") %> </td>
     <td style="width: 6%"> <%= (d.matching_results.ukbb? d.matching_results.ukbb.n_cases + " / " + d.matching_results.ukbb.n_controls :"NA") %> </td>
     {% endif %}
+
+    {% if config.browser == 'EXTENSION' %}
+    <td style="width: 6%"><%= d.finngen_cases %> <!-- FINNGEN cases --></th>
+    <td style="width: 6%"><%= d.finngen_controls %> <!-- FINNGEN controls --></th>
+    <td style="width: 6%"><%= d.ukb_cases %> <!-- UKB cases --></th>
+    <td style="width: 6%"><%= d.ukb_controls %> <!-- UKB controls --></th>
+    {% endif %}
+    
   </tr>
 </script>
 
