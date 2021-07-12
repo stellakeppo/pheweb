@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import ReactTable from 'react-table'
 import { CSVLink } from 'react-csv'
-import { phenolistTableCols } from '../tables.js'
+import { phenolistTableCols , phenoColumn } from '../tables.js'
 
 class Index extends React.Component {
 
@@ -12,7 +12,7 @@ class Index extends React.Component {
 	}
         super(props)
         this.state = {
-	    phenolistColumns: phenolistTableCols[window.browser],
+	    phenolistColumns: null,
 	    filtered: [],
 	    dataToDownload: [],
 	    headers: [
@@ -33,6 +33,16 @@ class Index extends React.Component {
     }
 
     getPhenos() {
+	fetch('/api/config')
+	    .then( response => {
+		if(!response) { throw response; }
+		else { return response.json(); }
+	    })
+	    .then( response => response == null?[]:response)
+	    .then( response => response.map(function(c){ console.log(c.attributes); return { ...phenoColumn[c.type], ...c.attributes }; }))
+	    .then( response => { console.log(response); return response; })
+	    .then( response => this.setState({ phenolistColumns : response }));
+	
 	fetch('/api/phenos')
 	    .then(response => {
 		if (!response.ok) throw response
@@ -61,7 +71,7 @@ class Index extends React.Component {
 
     render() {
 
-	if (!this.state.phenos) {
+	if (!this.state.phenos || this.state.phenolistColumns == null) {
 	    return <div>loading</div>
 	}
 

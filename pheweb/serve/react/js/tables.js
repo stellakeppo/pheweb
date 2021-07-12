@@ -148,7 +148,65 @@ const phenoColumn = {
 		Cell: props => +props.value.length,
 		filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
 		minWidth: 50
-	    }
+	      },
+    chrom : { Header: () => (<span title="chromosome" style={{textDecoration: 'underline'}}>chr</span>),
+	      accessor: 'chrom',
+	      Cell: props => <span style={{float: 'right', paddingRight: '10px'}}>{props.value}</span>,
+	      filterMethod: (filter, row) => row[filter.id] == filter.value,
+	      minWidth: 40
+	    },
+    pos : { Header: () => (<span title="position in build 38" style={{textDecoration: 'underline'}}>pos</span>),
+	    accessor: 'pos',
+	    Cell: props => (<a href={`/variant/${props.original.chrom}-${props.original.pos}-${props.original.ref}-${props.original.alt}`}>{props.value}</a>),
+	    filterMethod: (filter, row) => {
+		const s = filter.value.split('-').map(val => +val)
+		if (s.length == 1) return row[filter.id] == filter.value
+		else if (s.length == 2) return row[filter.id] > s[0] && row[filter.id] < s[1]
+	    },
+	    minWidth: 100,
+	  },
+    ref : { Header: () => (<span title="reference allele" style={{textDecoration: 'underline'}}>ref</span>),
+	    accessor: 'ref',
+	    Cell: props => props.value,
+	    minWidth: 50
+	  },
+    alt : { Header: () => (<span title="alternative allele" style={{textDecoration: 'underline'}}>alt</span>),
+	    accessor: 'alt',
+	    Cell: props => props.value,
+	    minWidth: 50
+	  },
+    locus : { Header: () => (<span title="LocusZoom plot for the region" style={{textDecoration: 'underline'}}>locus</span>),
+	      accessor: 'pos',
+	      Cell: props => <a href={`/region/${props.original.phenocode}/${props.original.chrom}:${Math.max(props.original.pos-200*1000, 0)}-${props.original.pos+200*1000}`}>locus</a>,
+	      Filter: ({ filter, onChange }) => null,
+	      minWidth: 50
+	    },
+    rsid : { Header: () => (<span title="rsid(s)" style={{textDecoration: 'underline'}}>rsid</span>),
+	     accessor: 'rsids',
+	     Cell: props => (<a href={`/variant/${props.original.chrom}-${props.original.pos}-${props.original.ref}-${props.original.alt}`}>{props.value}</a>),
+	     minWidth: 110
+	   },
+    nearestGenes : {
+	Header: () => (<span title="nearest gene(s)" style={{textDecoration: 'underline'}}>nearest gene</span>),
+	accessor: 'nearest_genes',
+	Cell: props => (<a href={`/gene/${props.value}`}>{props.value}</a>),
+	minWidth: 110 },
+    consequence : { Header: () => (<span title="VEP consequence" style={{textDecoration: 'underline'}}>consequence</span>),
+		    accessor: 'most_severe',
+		    Cell: props => props.value,
+		    minWidth: 180
+		  },
+    or : { Header: () => (<span title="odds ratio" style={{textDecoration: 'underline'}}>OR</span>),
+	   accessor: 'beta',
+	   filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
+	   Cell: props => Math.exp(props.value).toFixed(2),
+	   minWidth: 80
+	 },
+    pValue : { Header: () => (<span title="p-value" style={{textDecoration: 'underline'}}>p-value</span>),
+		accessor: 'pval',
+		filterMethod: (filter, row) => Math.abs(row[filter.id]) < +filter.value,
+		Cell: props => props.value.toExponential(1),
+		minWidth: 80 }
 }
 
 
@@ -184,66 +242,16 @@ const phenolistTableCols =
 	]
       }
 
-const phenoTableCommonCols = [[{
-    Header: () => (<span title="chromosome" style={{textDecoration: 'underline'}}>chr</span>),
-    accessor: 'chrom',
-    Cell: props => <span style={{float: 'right', paddingRight: '10px'}}>{props.value}</span>,
-    filterMethod: (filter, row) => row[filter.id] == filter.value,
-    minWidth: 40
-}, {
-    Header: () => (<span title="position in build 38" style={{textDecoration: 'underline'}}>pos</span>),
-    accessor: 'pos',
-    Cell: props => (<a href={`/variant/${props.original.chrom}-${props.original.pos}-${props.original.ref}-${props.original.alt}`}>{props.value}</a>),
-    filterMethod: (filter, row) => {
-	const s = filter.value.split('-').map(val => +val)
-	if (s.length == 1) return row[filter.id] == filter.value
-	else if (s.length == 2) return row[filter.id] > s[0] && row[filter.id] < s[1]
-    },
-    minWidth: 100,
-}, {
-    Header: () => (<span title="reference allele" style={{textDecoration: 'underline'}}>ref</span>),
-    accessor: 'ref',
-    Cell: props => props.value,
-    minWidth: 50
-}, {
-    Header: () => (<span title="alternative allele" style={{textDecoration: 'underline'}}>alt</span>),
-    accessor: 'alt',
-    Cell: props => props.value,
-    minWidth: 50
-}, {
-    Header: () => (<span title="LocusZoom plot for the region" style={{textDecoration: 'underline'}}>locus</span>),
-    accessor: 'pos',
-    Cell: props => <a href={`/region/${props.original.phenocode}/${props.original.chrom}:${Math.max(props.original.pos-200*1000, 0)}-${props.original.pos+200*1000}`}>locus</a>,
-    Filter: ({ filter, onChange }) => null,
-    minWidth: 50
-}, {
-    Header: () => (<span title="rsid(s)" style={{textDecoration: 'underline'}}>rsid</span>),
-    accessor: 'rsids',
-    Cell: props => (<a href={`/variant/${props.original.chrom}-${props.original.pos}-${props.original.ref}-${props.original.alt}`}>{props.value}</a>),
-    minWidth: 110
-}, {
-    Header: () => (<span title="nearest gene(s)" style={{textDecoration: 'underline'}}>nearest gene</span>),
-    accessor: 'nearest_genes',
-    Cell: props => (<a href={`/gene/${props.value}`}>{props.value}</a>),
-    minWidth: 110
-}, {
-    Header: () => (<span title="VEP consequence" style={{textDecoration: 'underline'}}>consequence</span>),
-    accessor: 'most_severe',
-    Cell: props => props.value,
-    minWidth: 180
-}], [{
-    Header: () => (<span title="odds ratio" style={{textDecoration: 'underline'}}>OR</span>),
-    accessor: 'beta',
-    filterMethod: (filter, row) => Math.abs(row[filter.id]) > +filter.value,
-    Cell: props => Math.exp(props.value).toFixed(2),
-    minWidth: 80
-}, {
-    Header: () => (<span title="p-value" style={{textDecoration: 'underline'}}>p-value</span>),
-    accessor: 'pval',
-    filterMethod: (filter, row) => Math.abs(row[filter.id]) < +filter.value,
-    Cell: props => props.value.toExponential(1),
-    minWidth: 80
-}]]
+const phenoTableCommonCols = [[ phenoColumn.chrom  ,
+				phenoColumn.pos ,
+				phenoColumn.ref ,
+				phenoColumn.alt ,
+				phenoColumn.locus ,
+				phenoColumn.rsid ,
+				phenoColumn.nearestGenes ,
+				phenoColumn.consequence],
+			      [ phenoColumn.or ,
+				phenoColumn.pValue ]]
 
 const phenoTableCols = {
     'EXTENSION' : [ ...phenoTableCommonCols[0],
@@ -1072,4 +1080,4 @@ const codingTableCols = [{
     }
 }]
 
-export { phenolistTableCols, lofTableCols, chipTableCols, codingTableCols, regionTableCols, phenoTableCols, csTableCols, csInsideTableCols }
+export { phenolistTableCols, lofTableCols, chipTableCols, codingTableCols, regionTableCols, phenoTableCols, csTableCols, csInsideTableCols , phenoColumn }
