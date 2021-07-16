@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 import pymysql
 import imp
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 from ...file_utils import MatrixReader, common_filepaths
 from ...utils import get_phenolist, get_gene_tuples
 
@@ -615,8 +615,8 @@ class TabixGnomadDao(GnomadDB):
 
 class TabixResultDao(ResultDB):
 
-    def __init__(self, phenos, matrix_path):
-
+    def __init__(self, phenos, matrix_path, chromosome_map : Optional[Dict[int, str]] = None):
+        self.chromosome_map = chromosome_map if chromosome_map is not None else dict() # renames chromosome when searching tabix files 
         self.matrix_path = matrix_path
         self.pheno_map = phenos(0)
         self.tabix_file = pysam.TabixFile(self.matrix_path, parser=None)
@@ -683,12 +683,18 @@ class TabixResultDao(ResultDB):
                 return r
         return None
 
+    def get_chr(self, v : Variant) -> str:
+        if v.chr in self.chromosome_map:
+            return self.chromosome_map[v.chr]
+        else:
+            return str(v.chr)
+
     def get_variants_results(self, variants: List[Variant]) -> List[ Tuple[Variant, PhenoResult] ]:
         if type(variants) is not list:
             variants = [variants]
         results = []
         for v in variants:
-            res = self.get_variant_results_range(v.chr, v.pos, v.pos)
+            res = self.get_variant_results_range(self.get_chr(v), v.pos, v.pos)
             for r in res:
                 if r[0]==v:
                     results.append(r)
