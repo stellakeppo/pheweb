@@ -74,7 +74,7 @@ def process_io(readf, writef, rename, exclude):
     header = process_header(readf.readline(),rename)
     exclude = process_exclude(header,exclude)
     writef.write(process_line(header, exclude))
-    for line in readf.readlines():
+    for line in readf:
         writef.write(process_line(line, exclude))
     return writef
 
