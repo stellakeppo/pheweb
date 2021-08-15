@@ -71,7 +71,7 @@ do
       echo " , " >> "$PHONO_LIST_TMP_FILE"
     fi
 
-    gsutil cat "$BUCKET_PATH" | zcat | awk -F"\t" '{ if($15 > 1) { print }}' > "$ASSOC_FILE"
+    gsutil cat "$BUCKET_PATH" | zcat | awk -F"\t" '{ if($15 > 1) { print }}' | head -n 100000 > "$ASSOC_FILE"
 
     echo "$ASSOC_FILE" | awk '{print $1 "\t" $1 "\t" $1 "\t" $1 "\t" $1 "\t" $1}' >> generated-by-pheweb/pheno_config.txt
     pheweb map-fields --rename '#CHR:chrom,POS:pos,REF:ref,ALT:alt,SNP:snp,inv_var_meta_p:pval,all_inv_var_meta_beta:beta,all_inv_var_meta_sebeta:sebeta' "$ASSOC_FILE"
@@ -81,6 +81,19 @@ do
 done < "$INVENTORY_CATALOG"
 echo "]" >> "$PHONO_LIST_TMP_FILE"
 
+# check and do the exact same as
+#  wdl/import.wdl
+pheweb phenolist glob ./generated-by-pheweb/parsed/*
+pheweb phenolist extract-phenocode-from-filepath --simple
+
+pheweb sites
+pheweb make-gene-aliases-trie
+pheweb add-rsids
+pheweb add-genes
+PYTHONFAULTHANDLER=1 pheweb make-tries
+
+pheweb augment-phenos
+pheweb manhattan
 
 python3 "$PHEWEB_ROOT/pheweb/load/external_matrix.py" \
        generated-by-pheweb/pheno_config.txt \
@@ -93,16 +106,7 @@ python3 "$PHEWEB_ROOT/pheweb/load/external_matrix.py" \
 
 bgzip generated-by-pheweb/matrix.tsv
 tabix -S 1 -b 2 -e 2 -s 1 generated-by-pheweb/matrix.tsv.gz
-pheweb phenolist glob ./generated-by-pheweb/parsed/*
-pheweb phenolist extract-phenocode-from-filepath --simple
-pheweb augment-phenos
-pheweb manhattan
 
-pheweb sites
-pheweb make-gene-aliases-trie
-pheweb add-rsids
-pheweb add-genes
-pheweb make-tries
 
 for PHENOCODE in "${ALL_PHENOS[@]}"
 do
