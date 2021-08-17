@@ -34,9 +34,7 @@ RUN apt-get update && apt-get install default-libmysqlclient-dev git python3-pip
      python3 -m pip install cython && \
      python3 -m pip install pip==20.1.1 --upgrade && \
      python3 -m pip install /pheweb && \
-     python3 -m pip freeze && \
-     apt-get purge git --yes
-
+     python3 -m pip freeze
 # create react js bundle
 RUN cd /pheweb/pheweb/serve/react && \
     npm install && node_modules/webpack/bin/webpack.js --config webpack.prod.js && \
