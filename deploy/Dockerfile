@@ -30,7 +30,7 @@ ADD . /pheweb
 
 
 # install python packages and perquisites
-RUN apt-get update
+RUN apt-get update  --allow-releaseinfo-change
 RUN apt-get install default-libmysqlclient-dev git python3-pip libffi-dev libz-dev libssl-dev libbz2-dev liblzma-dev --yes --fix-missing
 RUN python3 -m pip install cython
 RUN python3 -m pip install pip==20.1.1 --upgrade
