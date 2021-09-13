@@ -9,7 +9,7 @@ scripts = '''
 phenolist verify
 parse_input_files
 sites
-make_gene_aliases_trie
+make_cpras_rsids_sqlite3
 add_rsids
 add_genes
 make_tries

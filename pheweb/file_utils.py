@@ -2,6 +2,8 @@
 from .utils import PheWebError, get_phenolist, chrom_order
 from .conf_utils import conf
 
+from typing import List, Callable, Dict, Union, Iterator, Optional, Any
+from pathlib import Path
 import io
 import os
 import csv
@@ -53,7 +55,32 @@ common_filepaths = {
     'pheno_gz':  (lambda phenocode: get_generated_path('pheno_gz', '{}.gz'.format(phenocode))),
     'manhattan': (lambda phenocode: get_generated_path('manhattan', '{}.json'.format(phenocode) if phenocode else '')),
     'qq':        (lambda phenocode: get_generated_path('qq', '{}.json'.format(phenocode) if phenocode else '')),
+    'cpras-rsids-sqlite3': get_generated_path('sites/cpras-rsids.sqlite3'),
 }
+
+def get_filepath(kind:str, *, must_exist:bool = True) -> str:
+    if kind not in common_filepaths: raise Exception("Unknown kind of filepath: {}".format(repr(kind)))
+    filepath: str = common_filepaths[kind]
+    print(filepath)
+    if must_exist and not os.path.exists(filepath):
+        raise PheWebError("Filepath {} of kind {} was requested but doesn't exist".format(filepath, kind))
+    return filepath
+
+def get_tmp_path(arg:Union[Path,str]) -> str:
+    arg = str(arg)
+    if arg.startswith(get_generated_path()):
+        mkdir_p(get_generated_path('tmp'))
+        tmp_basename = arg[len(get_generated_path()):].lstrip(os.path.sep).replace(os.path.sep, '-')
+        ret = get_generated_path('tmp', tmp_basename)
+    elif arg.startswith(os.path.sep):
+        ret = arg + '.tmp'
+    else:
+        mkdir_p(get_generated_path('tmp'))
+        ret = get_generated_path('tmp', arg)
+    assert ret != arg, (ret, arg)
+    while os.path.exists(ret):
+        ret = '{}/{}-{}'.format(os.path.dirname(ret), random.choice('123456789'), os.path.basename(ret))
+    return ret
 
 # TODO: make a standard function for getting file names that checks that they exist.
 #       if the file doesn't exist, it prints an error message telling the user how to make that file.
@@ -62,16 +89,16 @@ common_filepaths = {
 def make_basedir(path):
     mkdir_p(os.path.dirname(path))
 
-def get_tmp_path(arg):
-    if arg.startswith(get_generated_path()):
-        mkdir_p(get_generated_path('tmp'))
-        tmp_basename = arg[len(get_generated_path()):].lstrip(os.path.sep).replace(os.path.sep, '-')
-        return get_generated_path('tmp', tmp_basename)
-    elif arg.startswith(os.path.sep):
-        return arg + '.tmp'
-    else:
-        mkdir_p(get_generated_path('tmp'))
-        return get_generated_path('tmp', arg)
+# def get_tmp_path(arg):
+#     if arg.startswith(get_generated_path()):
+#         mkdir_p(get_generated_path('tmp'))
+#         tmp_basename = arg[len(get_generated_path()):].lstrip(os.path.sep).replace(os.path.sep, '-')
+#         return get_generated_path('tmp', tmp_basename)
+#     elif arg.startswith(os.path.sep):
+#         return arg + '.tmp'
+#     else:
+#         mkdir_p(get_generated_path('tmp'))
+#         return get_generated_path('tmp', arg)
 
 def get_dated_tmp_path(prefix):
     assert '/' not in prefix

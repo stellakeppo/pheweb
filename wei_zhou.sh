@@ -72,6 +72,7 @@ do
     fi
 
     gsutil cat "$BUCKET_PATH" | zcat | awk -F"\t" '{ if($15 > 1) { print }}' | head -n 100000 > "$ASSOC_FILE"
+    #gsutil cat "$BUCKET_PATH" | zcat | awk -F"\t" '{ if($15 > 1) { print }}' > "$ASSOC_FILE"
 
     echo "$ASSOC_FILE" | awk '{print $1 "\t" $1 "\t" $1 "\t" $1 "\t" $1 "\t" $1}' >> generated-by-pheweb/pheno_config.txt
     pheweb map-fields --rename '#CHR:chrom,POS:pos,REF:ref,ALT:alt,SNP:snp,inv_var_meta_p:pval,all_inv_var_meta_beta:beta,all_inv_var_meta_sebeta:sebeta' "$ASSOC_FILE"
@@ -90,7 +91,8 @@ pheweb sites
 pheweb make-gene-aliases-trie
 pheweb add-rsids
 pheweb add-genes
-PYTHONFAULTHANDLER=1 pheweb make-tries
+pheweb make-cpras-rsids-sqlite3
+read
 
 pheweb augment-phenos
 pheweb manhattan
