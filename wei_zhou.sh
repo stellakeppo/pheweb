@@ -71,7 +71,7 @@ do
       echo " , " >> "$PHONO_LIST_TMP_FILE"
     fi
 
-    gsutil cat "$BUCKET_PATH" | zcat | awk -F"\t" '{ if($15 > 1) { print }}' | head -n 100000 > "$ASSOC_FILE"
+    gsutil cat "$BUCKET_PATH" | zcat | awk -F"\t" '{ if($15 > 1) { print }}' | head -n 100 > "$ASSOC_FILE"
     #gsutil cat "$BUCKET_PATH" | zcat | awk -F"\t" '{ if($15 > 1) { print }}' > "$ASSOC_FILE"
 
     echo "$ASSOC_FILE" | awk '{print $1 "\t" $1 "\t" $1 "\t" $1 "\t" $1 "\t" $1}' >> generated-by-pheweb/pheno_config.txt
@@ -88,11 +88,13 @@ pheweb phenolist glob ./generated-by-pheweb/parsed/*
 pheweb phenolist extract-phenocode-from-filepath --simple
 
 pheweb sites
-pheweb make-gene-aliases-trie
+pheweb make-gene-aliases-tries
 pheweb add-rsids
 pheweb add-genes
 pheweb make-cpras-rsids-sqlite3
+pheweb make-gene-aliases-sqlite3
 read
+
 
 pheweb augment-phenos
 pheweb manhattan

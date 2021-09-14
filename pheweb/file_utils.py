@@ -56,6 +56,7 @@ common_filepaths = {
     'manhattan': (lambda phenocode: get_generated_path('manhattan', '{}.json'.format(phenocode) if phenocode else '')),
     'qq':        (lambda phenocode: get_generated_path('qq', '{}.json'.format(phenocode) if phenocode else '')),
     'cpras-rsids-sqlite3': get_generated_path('sites/cpras-rsids.sqlite3'),
+    'gene-aliases-sqlite3': (lambda: get_generated_path('resources/gene_aliases-v{}.sqlite3'.format(genes_version))), 
 }
 
 def get_filepath(kind:str, *, must_exist:bool = True) -> str:

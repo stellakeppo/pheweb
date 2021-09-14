@@ -10,6 +10,7 @@ phenolist verify
 parse_input_files
 sites
 make_cpras_rsids_sqlite3
+make_gene_aliases_sqlite3
 add_rsids
 add_genes
 make_tries
