@@ -573,3 +573,4 @@ def _ensure_conf():
     conf.set_default_value("show_ukbb", False)
     conf.set_default_value("show_risteys", False)
     conf.set_default_value("lof_threshold", 1e-3)
+    conf.set_default_value("ui_conf", None)

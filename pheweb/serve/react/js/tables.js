@@ -186,11 +186,12 @@ const phenoColumn = {
 	     Cell: props => (<a href={`/variant/${props.original.chrom}-${props.original.pos}-${props.original.ref}-${props.original.alt}`}>{props.value}</a>),
 	     minWidth: 110
 	   },
-    nearestGenes : {
+    nearestGene : {
 	Header: () => (<span title="nearest gene(s)" style={{textDecoration: 'underline'}}>nearest gene</span>),
 	accessor: 'nearest_genes',
 	Cell: props => (<a href={`/gene/${props.value}`}>{props.value}</a>),
 	minWidth: 110 },
+    
     consequence : { Header: () => (<span title="VEP consequence" style={{textDecoration: 'underline'}}>consequence</span>),
 		    accessor: 'most_severe',
 		    Cell: props => props.value,
@@ -1080,4 +1081,34 @@ const codingTableCols = [{
     }
 }]
 
-export { phenolistTableCols, lofTableCols, chipTableCols, codingTableCols, regionTableCols, phenoTableCols, csTableCols, csInsideTableCols , phenoColumn }
+
+
+const text_formatter = (props) => props.value;
+const number_formatter = (props) => +props.value;
+const float_formatter = (props) => (+props.value).toExponential(1);
+
+const formatters = {
+    "text" : text_formatter ,
+    "number" : number_formatter ,
+    "float" : float_formatter
+};
+
+
+const constructColumn = (param) => {
+    if('type' in param) {
+	    return { ...phenoColumn[param.type], ...param.attributes };
+    } else {
+	const { title , label , accessor , formatter , minWidth } = param;
+	
+	const column =  { Header: () => (<span title={`{title || label }`} style={{textDecoration: 'underline'}}>{label || title}</span>),
+			  accessor: accessor,
+			  Cell: formatter in formatters ? formatters[formatter]:text_formatter ,
+			  ...(minWidth && { minWidth })
+			};
+	console.log(column);
+	return column;
+    }
+    
+};
+
+export { phenolistTableCols, lofTableCols, chipTableCols, codingTableCols, regionTableCols, phenoTableCols, csTableCols, csInsideTableCols , phenoColumn , constructColumn }

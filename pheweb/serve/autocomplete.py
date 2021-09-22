@@ -3,7 +3,7 @@ from ..file_utils import get_filepath
 from .server_utils import parse_variant
 
 from flask import url_for
-
+from pathlib import Path
 import urllib.parse
 import itertools
 import re
@@ -29,10 +29,12 @@ class Autocompleter(object):
     def __init__(self, phenos:Dict[str,Dict[str,Any]]):
         self._phenos = copy.deepcopy(phenos)
         self._preprocess_phenos()
+        cpras_rsids_path = Path(get_filepath('cpras-rsids-sqlite3', must_exist=False))
+        gene_aliases_path = Path(get_filepath('gene-aliases-sqlite3', must_exist=False)())
 
-        self._cpras_rsids_sqlite3 = get_sqlite3_readonly_connection(get_filepath('cpras-rsids-sqlite3'))
+        self._cpras_rsids_sqlite3 = get_sqlite3_readonly_connection(str(cpras_rsids_path))
         self._cpras_rsids_sqlite3.row_factory = sqlite3.Row
-        self._gene_aliases_sqlite3 = get_sqlite3_readonly_connection(get_filepath('gene-aliases-sqlite3'))
+        self._gene_aliases_sqlite3 = get_sqlite3_readonly_connection(str(gene_aliases_path))
         self._gene_aliases_sqlite3.row_factory = sqlite3.Row
 
         self._autocompleters = [
