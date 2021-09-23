@@ -3,20 +3,16 @@ import { Link } from 'react-router-dom'
 import ReactTable from 'react-table'
 import { CSVLink } from 'react-csv'
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
-import { phenoTableCols, csTableCols, csInsideTableCols } from '../tables.js'
+import { phenoColumn, phenoTableCols, csTableCols, csInsideTableCols , constructColumn } from '../tables.js'
 import { create_gwas_plot, create_qq_plot } from '../pheno.js'
 
 class Pheno extends React.Component {
 
     constructor(props) {
-
-	if (!phenoTableCols[window.browser]) {
-	    alert('no table columns for ' + window.browser)
-	}
         super(props)
         this.state = {
 		phenocode: props.match.params.pheno,
-	    columns: phenoTableCols[window.browser],
+  	        columns: window.browser in phenoTableCols ? phenoTableCols[window.browser] : null,
 		csColumns: csTableCols,
 		InsideColumns: csInsideTableCols,
 		dataToDownload: [],
@@ -66,6 +62,21 @@ class Pheno extends React.Component {
     }
     
     getPheno(phenocode) {
+	fetch('/api/config/ui')
+	    .then( response => response && response.json())
+	    .then( response => {
+		if(response && "pheno" in response){
+		    const config = response["pheno"];
+		    console.log(config);
+		    if("phenolist" in config){
+			var columns = config["phenolist"];
+			columns = columns.map(constructColumn);
+			this.setState({ columns });
+		    }
+		}
+	    })
+	    .then(_ => { (this.state && this.state.columns) || alert('no table columns for ' + window.browser); });
+	
 	fetch('/api/pheno/' + phenocode)
 	    .then(this.resp_json)
 	    .then(response => {
@@ -185,7 +196,7 @@ class Pheno extends React.Component {
 	    return <div>{this.state.error.statusText || this.state.error}</div>
 	}
 
-	if (!this.state.pheno) {
+	if (!this.state.pheno || !this.state.columns) {
 	    return <div>loading</div>
 	}
 	

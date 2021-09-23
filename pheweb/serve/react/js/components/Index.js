@@ -2,17 +2,14 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import ReactTable from 'react-table'
 import { CSVLink } from 'react-csv'
-import { phenolistTableCols , phenoColumn } from '../tables.js'
+import { phenolistTableCols , phenoColumn , constructColumn } from '../tables.js'
 
 class Index extends React.Component {
 
     constructor(props) {
-	if (!phenolistTableCols[window.browser]) {
-	    alert('no table columns for ' + window.browser)
-	}
         super(props)
         this.state = {
-	    phenolistColumns: null,
+	    phenolistColumns: window.browser in phenolistTableCols?phenolistTableCols[window.browser]:null,
 	    filtered: [],
 	    dataToDownload: [],
 	    headers: [
@@ -33,15 +30,21 @@ class Index extends React.Component {
     }
 
     getPhenos() {
-	fetch('/api/config')
+	fetch('/api/config/ui')
+	    .then( response => response && response.json())
 	    .then( response => {
-		if(!response) { throw response; }
-		else { return response.json(); }
+		if(response && "index" in response){
+		    const config = response["index"];
+		    console.log(config);
+		    if("phenolist" in config){
+			var phenolistColumns = config["phenolist"];
+			phenolistColumns = phenolistColumns.map(constructColumn);
+			this.setState({ phenolistColumns });
+		    }
+		}
 	    })
-	    .then( response => response == null?[]:response)
-	    .then( response => response.map(function(c){ console.log(c.attributes); return { ...phenoColumn[c.type], ...c.attributes }; }))
-	    .then( response => { console.log(response); return response; })
-	    .then( response => this.setState({ phenolistColumns : response }));
+	    .then(_ => { (this.state && this.state.phenolistColumns) || alert('no table columns for ' + window.browser); });
+
 	
 	fetch('/api/phenos')
 	    .then(response => {

@@ -90,7 +90,9 @@ app.config['lof'] = 'lof' in [list(c.keys())[0] for c in conf.database_conf]
 app.config['coding'] = False
 app.config['chip'] = False
 app.config['ukbb'] = False
-app.config['ui'] = None
+
+app.config['conf_ui'] = conf['conf_ui']
+
 for c in conf.database_conf:
     if 'coding' in c:
         app.config['coding'] = True
@@ -155,17 +157,11 @@ def homepage(path):
                            tooltip_underscoretemplate=conf.parse.tooltip_underscoretemplate,
                            vis_conf=conf.vis_conf)
 
-@app.route('/api/config', methods=['GET'])
-def config_get():
-    import json
-    return json.dumps(app.config['ui'])
 
-@app.route('/api/config', methods=['POST'])
-def config_post():
+@app.route('/api/config/ui', methods=['GET'])
+def get_config_ui():
     import json
-    tmp = app.config['ui']
-    app.config['ui'] = request.get_json(force=True)
-    return json.dumps(tmp)
+    return json.dumps(app.config['conf_ui'])
 
 @app.route('/api/autoreport/<phenocode>')
 def autoreport(phenocode):
