@@ -48,6 +48,7 @@ for submodule in '''
  download_genes
  make_cpras_rsids_sqlite3
  make_gene_aliases_sqlite3
+ make_gene_aliases_trie
  add_rsids
  add_genes
  make_tries

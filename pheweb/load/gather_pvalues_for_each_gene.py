@@ -21,7 +21,12 @@ def run(argv):
     filepath = conf.data_dir +'/'
     ret_lines(filepath, argv[0] if argv else None)
 
-
+def is_float(value):
+  try:
+    float(value)
+    return True
+  except ValueError:
+    return False
 
 def ret_lines(dataPath, matrixFile):
     '''
@@ -112,7 +117,7 @@ def ret_lines(dataPath, matrixFile):
                     pheno = phenoTypes[phenoIx]
                     #get the data of the phenotype
                     for i in phenoMetaRange:
-                        geneChromDict[gene][pheno][phenoMeta[i]] = float(line[lenMeta + lenPheno*phenoIx + i]) if line[lenMeta + lenPheno*phenoIx + i] != '' else ''
+                        geneChromDict[gene][pheno][phenoMeta[i]] = float(line[lenMeta + lenPheno*phenoIx + i]) if is_float(line[lenMeta + lenPheno*phenoIx + i]) else ''
 
                     geneChromDict[gene][pheno]['chrom'] = chrom
                     geneChromDict[gene][pheno]['pos'] = pos

@@ -34,10 +34,23 @@ def run(argv:List[str]) -> None:
         cpras_rsids_tmp_filepath = Path(get_tmp_path(cpras_rsids_filepath))
         if cpras_rsids_tmp_filepath.exists(): cpras_rsids_tmp_filepath.unlink()
         db_conn = sqlite3.connect(str(cpras_rsids_tmp_filepath), isolation_level=None)
-        db_conn.execute('PRAGMA journal_mode = WAL;')
+
+        db_conn.execute("pragma mmap_size = 30000000000;")
+        db_conn.execute("pragma page_size = 32768;")
+
+
+        db_conn.execute("PRAGMA journal_mode = OFF;")
+        db_conn.execute("PRAGMA synchronous = 0;")
+        db_conn.execute("PRAGMA cache_size = 1000000;")
+        db_conn.execute("PRAGMA locking_mode = EXCLUSIVE;")
+        db_conn.execute("PRAGMA temp_store = MEMORY;")
+        
         with db_conn:
+            print("create")
             db_conn.execute('CREATE TABLE cpras_rsids (cpra TEXT, rsid TEXT)')
+            print("insert")
             db_conn.executemany('INSERT INTO cpras_rsids (cpra, rsid) VALUES (?,?)', get_cpra_rsid_pairs())
+            print("index")
             db_conn.execute('CREATE INDEX rsid_idx ON cpras_rsids (rsid)')
 
         cpras_rsids_tmp_filepath.rename(cpras_rsids_filepath)
