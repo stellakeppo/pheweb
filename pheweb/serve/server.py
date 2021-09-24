@@ -60,6 +60,13 @@ app.config['PREFERRED_URL_SCHEME'] = 'https'
 
 if 'GOOGLE_ANALYTICS_TRACKING_ID' in conf:
     app.config['GOOGLE_ANALYTICS_TRACKING_ID'] = conf['GOOGLE_ANALYTICS_TRACKING_ID']
+if 'GLOBAL_SITE_TAG_ID' in conf:
+    app.config['GLOBAL_SITE_TAG_ID'] = conf['GLOBAL_SITE_TAG_ID']
+print("..........................................................................................")
+print('GLOBAL_SITE_TAG_ID' in conf)
+print(conf['GLOBAL_SITE_TAG_ID'])
+print("..........................................................................................")
+
 if 'SENTRY_DSN' in conf:
     app.config['SENTRY_DSN'] = conf['SENTRY_DSN']
 app.config['PHEWEB_VERSION'] = pheweb_version
