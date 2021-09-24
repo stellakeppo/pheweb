@@ -1086,13 +1086,13 @@ const codingTableCols = [{
 const text_formatter = (props) => props.value;
 const number_formatter = (props) => +props.value;
 const float_formatter = (props) => (+props.value).toExponential(1);
-
+const array_formatter = (props) => props.value.join(" ");
 const formatters = {
     "text" : text_formatter ,
     "number" : number_formatter ,
-    "float" : float_formatter
+    "float" : float_formatter ,
+    "array" : array_formatter , 
 };
-
 
 const constructColumn = (param) => {
     if('type' in param) {
