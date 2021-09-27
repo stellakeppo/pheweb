@@ -64,6 +64,8 @@ for submodule in '''
  export_data
  map_fields
  external_matrix
+ make_cpras_rsids_sqlite3
+ make_gene_aliases_sqlite3
 '''.split():
     def f(submodule, argv):
         module = importlib.import_module('.load.{}'.format(submodule), __package__)
