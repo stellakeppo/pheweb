@@ -2,6 +2,9 @@
 from .utils import PheWebError, get_phenolist, chrom_order
 from .conf_utils import conf
 
+from typing import List, Callable, Dict, Union, Iterator, Optional, Any
+from pathlib import Path
+
 import io
 import os
 import csv
@@ -53,6 +56,8 @@ common_filepaths = {
     'pheno_gz':  (lambda phenocode: get_generated_path('pheno_gz', '{}.gz'.format(phenocode))),
     'manhattan': (lambda phenocode: get_generated_path('manhattan', '{}.json'.format(phenocode) if phenocode else '')),
     'qq':        (lambda phenocode: get_generated_path('qq', '{}.json'.format(phenocode) if phenocode else '')),
+    'cpras-rsids-sqlite3': get_generated_path('sites/cpras-rsids.sqlite3'),
+    'gene-aliases-sqlite3': (lambda: get_generated_path('resources/gene_aliases-v{}.sqlite3'.format(genes_version))), 
 }
 
 # TODO: make a standard function for getting file names that checks that they exist.
@@ -62,6 +67,14 @@ common_filepaths = {
 def make_basedir(path):
     mkdir_p(os.path.dirname(path))
 
+def get_filepath(kind:str, *, must_exist:bool = True) -> str:
+    if kind not in common_filepaths: raise Exception("Unknown kind of filepath: {}".format(repr(kind)))
+    filepath: str = common_filepaths[kind]
+    print(filepath)
+    if must_exist and not os.path.exists(filepath):
+        raise PheWebError("Filepath {} of kind {} was requested but doesn't exist".format(filepath, kind))
+    return filepath
+    
 def get_tmp_path(arg):
     if arg.startswith(get_generated_path()):
         mkdir_p(get_generated_path('tmp'))
