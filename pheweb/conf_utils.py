@@ -577,3 +577,4 @@ def _ensure_conf():
     conf.set_default_value("show_risteys", False)
     conf.set_default_value("lof_threshold", 1e-3)
     conf.set_default_value("GLOBAL_SITE_TAG_ID", None)
+

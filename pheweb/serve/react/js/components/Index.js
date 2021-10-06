@@ -2,36 +2,41 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import ReactTable from 'react-table'
 import { CSVLink } from 'react-csv'
-import { phenolistTableCols } from '../tables.js'
+import { phenolistTableCols , phenoColumn , constructColumn , constructHeaders } from '../tables.js'
 
 class Index extends React.Component {
 
     constructor(props) {
-	if (!phenolistTableCols[window.browser]) {
-	    alert('no table columns for ' + window.browser)
-	}
         super(props)
         this.state = {
-	    phenolistColumns: phenolistTableCols[window.browser],
+	    phenolistColumns: window.browser in phenolistTableCols?phenolistTableCols[window.browser]:null,
 	    filtered: [],
 	    dataToDownload: [],
-	    headers: [
-		{label: 'phenotype', key: 'phenostring'},
-		{label: 'phenocode', key: 'phenocode'},
-		{label: 'category', key: 'category'},
-		{label: 'number of cases', key: 'num_cases'},
-		{label: `number of cases ${window.release_prev}`, key: 'num_cases_prev'},
-		{label: 'number of controls', key: 'num_controls'},
-		{label: 'genome-wide sig loci', key: 'num_gw_significant'},
-		{label: `genome-wide sig loci ${window.release_prev}`, key: 'num_gw_significant_prev'},
-		{label: 'genomic control lambda', key: 'lambda'}
-	    ]
 	}
 	this.download = this.download.bind(this)
 	this.getPhenos = this.getPhenos.bind(this)
+	this.getConfig = this.getConfig.bind(this)
+	this.getConfig()
 	this.getPhenos()
     }
-
+    
+    getConfig() {
+	fetch('/api/config/ui')
+	    .then( response => response && response.json())
+	    .then( response => {
+		if(response && "index" in response){
+		    const config = response["index"];
+		    console.log(config);
+		    if("phenolist" in config){
+			var phenolistColumns = config["phenolist"];
+			phenolistColumns = phenolistColumns.map(constructColumn);
+			this.setState({ phenolistColumns });
+		    }
+		}
+	    })
+	    .then(_ => { (this.state && this.state.phenolistColumns) || alert('no table columns for ' + window.browser); });
+    };
+    
     getPhenos() {
 	fetch('/api/phenos')
 	    .then(response => {
@@ -61,7 +66,7 @@ class Index extends React.Component {
 
     render() {
 
-	if (!this.state.phenos) {
+	if (!this.state.phenos || this.state.phenolistColumns == null) {
 	    return <div>loading</div>
 	}
 
@@ -87,7 +92,7 @@ class Index extends React.Component {
 	    </div>
 	    </div>
             <CSVLink
-	headers={this.state.headers}
+	headers={constructHeaders(this.state.phenolistColumns)}
 	data={this.state.dataToDownload}
 	separator={'\t'}
 	enclosingCharacter={''}
