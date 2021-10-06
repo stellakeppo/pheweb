@@ -3,26 +3,26 @@ import { Link } from 'react-router-dom'
 import ReactTable from 'react-table'
 import { CSVLink } from 'react-csv'
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
-import { phenoTableCols, csTableCols, csInsideTableCols , pval_sentinel } from '../tables.js'
+import { phenoTableCols, csTableCols, csInsideTableCols , pval_sentinel , constructColumn } from '../tables.js'
 import { create_gwas_plot, create_qq_plot } from '../pheno.js'
 
 class Pheno extends React.Component {
 
+
     constructor(props) {
 
-	if (!phenoTableCols[window.browser]) {
-	    alert('no table columns for ' + window.browser)
-	}
         super(props)
         this.state = {
-		phenocode: props.match.params.pheno,
-	    columns: phenoTableCols[window.browser],
-		csColumns: csTableCols,
-		InsideColumns: csInsideTableCols,
-		dataToDownload: [],
-		locus_groups: {},
-		selectedTab: 0
+	    phenocode: props.match.params.pheno,
+	    columns : window.browser in phenoTableCols ? phenoTableCols[window.browser] : null,
+	    csColumns : csTableCols,
+	    InsideColumns : csInsideTableCols,
+	    
+	    dataToDownload: [],
+	    locus_groups: {},
+	    selectedTab: 0
 	}
+	
 	this.resp_json = this.resp_json.bind(this)
 	this.error_state = this.error_state.bind(this)
 	this.error_alert = this.error_alert.bind(this)
@@ -34,10 +34,14 @@ class Pheno extends React.Component {
 	this.download = this.download.bind(this)
 	this.getGroup = this.getGroup.bind(this)
 	this.onTabSelect = this.onTabSelect.bind(this)
+	this.getConfig = this.getConfig.bind(this)
+	this.getConfig()
 	this.getUKBBN(props.match.params.pheno)
 	this.getPheno(props.match.params.pheno)
+	
     }
 
+    
     resp_json(response) {
         if (!response.ok) throw response
 	return response.json()
@@ -54,6 +58,28 @@ class Pheno extends React.Component {
 	alert(`${error.statusText || error}`);
     }
 
+    getConfig(){
+	fetch('/api/config/ui')
+            .then( response => response && response.json())
+            .then( response => {
+                if(response && "pheno" in response){
+                    const config = response["pheno"];
+                    console.log(config);
+                    if("Traditional" in config){
+                        var columns = config["Traditional"];
+                        columns = (columns == null)?[]:columns.map(constructColumn);
+                        this.setState({ columns });
+                    }
+		    if("Credible Sets" in config){
+			var csColumns = config["Credible Sets"];
+                        csColumns = (csColumns == null)?[]:csColumns.map(constructColumn);
+			this.setState({ csColumns });
+		    }
+                }
+            })
+            .then(_ => { (this.state && this.state.columns) || alert('no table columns for ' + window.browser); });
+    }
+    
     getUKBBN(phenocode) {
 	fetch('/api/ukbb_n/' + phenocode)
 	    .then(this.resp_json)
@@ -184,17 +210,23 @@ class Pheno extends React.Component {
 	    return <div>{this.state.error.statusText || this.state.error}</div>
 	}
 
-	if (!this.state.pheno) {
+	if (!this.state.pheno || !this.state.columns) {
 	    return <div>loading</div>
 	}
 	
 
 	const pheno = this.state.pheno
 	const ukbb = window.show_ukbb == 'True' ? (this.state.ukbb_n ?
-	      <div>UKBB: <strong>{this.state.ukbb_n[0]}</strong> cases, <strong>{this.state.ukbb_n[1]}</strong> controls</div> :
-						    <div>Phenotype not found in UKBB results</div>) : null
+						   <div>UKBB: <strong>{this.state.ukbb_n[0]}</strong> cases, <strong>{this.state.ukbb_n[1]}</strong> controls</div> :
+						   <div>Phenotype not found in UKBB results</div>) : null
 	const n_cc1 = pheno.cohorts ?
-	      <tbody><tr><td><b>{pheno.cohorts.reduce((acc, cur) => acc+cur.num_cases, 0)}</b> cases</td></tr><tr><td><b>{pheno.cohorts.reduce((acc, cur) => acc+cur.num_controls, 0)}</b> controls</td></tr></tbody> :
+	      <tbody>
+	        <tr>
+	           <td>
+	              <b>{pheno.cohorts.reduce((acc, cur) => acc+cur.num_cases, 0)}</b> cases</td></tr><tr><td><b>{pheno.cohorts.reduce((acc, cur) => acc+cur.num_controls, 0)}</b> controls
+	           </td>
+	        </tr>
+	      </tbody> :
 	      (pheno.num_cases ?
 	       <tbody><tr><td><b>{pheno.num_cases}</b> cases</td></tr><tr><td><b>{pheno.num_controls}</b> controls</td></tr></tbody> :
 	       pheno.num_samples ?
@@ -208,17 +240,14 @@ class Pheno extends React.Component {
 	const cs_table = this.state.credibleSets ?
 	      <div>
 	      <ReactTable
-	    ref={(r) => this.cstable = r}
-	data={this.state.credibleSets}
-	filterable
-	defaultFilterMethod={(filter, row) => row[filter.id].toLowerCase().includes(filter.value.toLowerCase())}
-	columns={this.state.csColumns}
-	defaultSorted={[{
-	    id: "pval",
-	    desc: false
-	}]}
-	defaultPageSize={20}
-	className="-striped -highlight"
+	          ref={(r) => this.cstable = r}
+	          data={this.state.credibleSets}
+	          filterable
+	          defaultFilterMethod={(filter, row) => row[filter.id].toLowerCase().includes(filter.value.toLowerCase())}
+	          columns={this.state.csColumns}
+	          defaultSorted={[{ id: "pval", desc: false }]}
+   	          defaultPageSize={20}
+	          className="-striped -highlight"
 	SubComponent={row => 
 		<ReactTable 
 		data={this.state.locus_groups.hasOwnProperty(row["original"]["locus_id"]) ? this.state.locus_groups[row["original"]["locus_id"]] : (this.getGroup(this.state.phenocode, row["original"]["locus_id"]),this.state.locus_groups[row["original"]["locus_id"]]) }
@@ -300,19 +329,14 @@ class Pheno extends React.Component {
 	const risteys = window.browser == 'FINNGEN' ?
 	    <p style={{marginBottom: '10px'}}><a style={{fontSize:'1.25rem', padding: '.25rem .5rem', backgroundColor: '#2779bd', color: '#fff', borderRadius: '.25rem', fontWeight: 700, boxShadow: '0 0 5px rgba(0,0,0,.5)'}}
 	href={'https://risteys.finngen.fi/phenocode/' + this.state.pheno.phenocode.replace('_EXALLC', '').replace('_EXMORE', '')} target="_blank">RISTEYS</a></p> : null
-        return (
-		<div style={{width: '100%', padding: '0'}}>
-		<h2 style={{marginTop: 0}}>{this.state.pheno.phenostring}</h2>
-		<p>{this.state.pheno.category}</p>
-		{risteys}
-		<table className='column_spacing'>
-		{n_cc1}
-		</table>
-                {ukbb}
-		<div id='manhattan_plot_container' />
-		<h3>Lead variants{is_cs}</h3>
-		<Tabs forceRenderTabPanel={true} selectedIndex={this.state.selectedTab} onSelect={this.onTabSelect} style={{width: '100%'}}>
-		<TabList>
+
+
+	const traditional = <><h4>Traditional</h4>{var_table}</>;
+	const credibleSet = <><h4>Credible Sets</h4>{cs_table}</>;
+
+	const tabPanel = (this.state.columns.length != 0 && this.state.csColumns.length != 0)?
+	      <Tabs forceRenderTabPanel={true} selectedIndex={this.state.selectedTab} onSelect={this.onTabSelect} style={{width: '100%'}}>
+	        <TabList>
 		<Tab>Credible Sets</Tab>
 		<Tab>Traditional</Tab>
 		</TabList>
@@ -326,7 +350,21 @@ class Pheno extends React.Component {
 				{var_table}
 			</div>
 		</TabPanel>
-		</Tabs>
+	    </Tabs>:
+	(this.state.columns.length != 0) ? traditional : (this.state.csColumns.length != 0 ? credibleSet : <></>);
+
+        return (
+		<div style={{width: '100%', padding: '0'}}>
+		<h2 style={{marginTop: 0}}>{this.state.pheno.phenostring}</h2>
+		<p>{this.state.pheno.category}</p>
+		{risteys}
+		<table className='column_spacing'>
+		{n_cc1}
+		</table>
+                {ukbb}
+		<div id='manhattan_plot_container' />
+		<h3>Lead variants{is_cs}</h3>
+	        {tabPanel}
 		<div style={{float:'left'}}>
 		<h3>QQ plot</h3>
 		<div id='qq_plot_container' style={{width:'400px'}} />

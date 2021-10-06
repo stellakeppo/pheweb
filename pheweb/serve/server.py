@@ -37,7 +37,7 @@ from .group_based_auth  import verify_membership
 from .server_auth import before_request
 
 from pheweb_colocalization.view import colocalization
-
+from .components.config_ui.view import config_ui
 app = Flask(__name__)
 
 ## allows debug statements in jinja
@@ -114,6 +114,7 @@ jeeves = ServerJeeves( conf )
 
 app.jeeves = jeeves
 app.register_blueprint(colocalization)
+app.register_blueprint(config_ui)
 
 if "data_dir" in conf:
     path=conf['data_dir'] + "resources"
@@ -155,6 +156,8 @@ def homepage(path):
     return render_template('index_react.html',
                            tooltip_underscoretemplate=conf.parse.tooltip_underscoretemplate,
                            vis_conf=conf.vis_conf)
+
+
 
 @app.route('/api/autoreport/<phenocode>')
 def autoreport(phenocode):
