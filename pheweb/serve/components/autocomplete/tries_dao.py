@@ -92,9 +92,8 @@ class TriesAutocompleter(Autocompleter):
             def f(cpra, rsids):
                 rsids = rsids.decode('ascii')
                 yield {
-                    "value": cpra,
+                    "variant": cpra,
                     "display": '{} ({})'.format(cpra, rsids) if rsids else cpra,
-                    "view": "variant",
                 }
 
             rsids = self._cpra_to_rsids_trie.get(key)
@@ -120,9 +119,8 @@ class TriesAutocompleter(Autocompleter):
             def f(rsid, cpra):
                 cpra = cpra.decode('ascii')
                 yield {
-                    "value": cpra,
+                    "variant": cpra,
                     "display": '{} ({})'.format(rsid, cpra),
-                    "view": "variant",
                 }
 
             rsids_to_check = [key] + ["{}{}".format(key, i) for i in range(10)]
@@ -140,9 +138,8 @@ class TriesAutocompleter(Autocompleter):
         for phenocode, pheno in self._phenos.items():
             if query in pheno['--spaced--phenocode']:
                 yield {
-                    "value": phenocode,
+                    "pheno": phenocode,
                     "display": "{} ({})".format(phenocode, pheno['phenostring']) if 'phenostring' in pheno else phenocode, # TODO: truncate phenostring intelligently
-                    "view": "pheno",
                 }
 
     def _autocomplete_phenostring(self, query):
@@ -150,9 +147,8 @@ class TriesAutocompleter(Autocompleter):
         for phenocode, pheno in self._phenos.items():
             if query in pheno['--spaced--phenostring']:
                 yield {
-                    "value": phenocode,
+                    "pheno": phenocode,
                     "display": "{} ({})".format(pheno['phenostring'], phenocode),
-                    "view": "pheno",
                 }
 
     def _autocomplete_gene(self, query):
@@ -166,20 +162,18 @@ class TriesAutocompleter(Autocompleter):
                         'value': canonical_symbol.split(',')[0],
                         'display': '{} (alias for {})'.format(
                             alias, ' and '.join(canonical_symbol.split(','))),
-                        'view': 'error/the alias {} is connected to the genes {}'.format(
+                        'error': 'the alias {} is connected to the genes {}'.format(
                             alias, ' and '.join(canonical_symbol.split(','))),
                     }
                 elif canonical_symbol == alias:
                     yield {
-                        "value": canonical_symbol,
+                        "gene": canonical_symbol,
                         "display": canonical_symbol,
-                        "view": "gene",
                     }
                 else:
                     yield {
-                        "value": canonical_symbol,
+                        "gene": canonical_symbol,
                         "display": '{} (alias for {})'.format(alias, canonical_symbol),
-                        "view": "gene",
                     }
 
             canonical_symbol = self._gene_alias_trie.get(key)
@@ -197,9 +191,8 @@ class TriesAutocompleter(Autocompleter):
                 for icd9 in pheno['icd9_info']:
                     if icd9['icd9_code'].startswith(query):
                         yield {
-                            "value": phenocode,
+                            "pheno": phenocode,
                             "display": "{} (icd9 code; phewas code: {}; icd9_string: {})".format(icd9['icd9_code'], phenocode, icd9['icd9_string']),
-                            "view": "pheno",
                         }
 
     _regex_get_icd9_string_autocompletion = re.compile('^\s*[a-zA-Z]')
@@ -210,9 +203,8 @@ class TriesAutocompleter(Autocompleter):
                 for icd9 in pheno.get('icd9_info', []):
                     if query in icd9['--spaced--icd9_string']:
                         yield {
-                            "value": phenocode,
+                            "pheno": phenocode,
                             "display": "{} (icd9 string; icd9 code: {}; phewas code: {})".format(icd9['icd9_string'], icd9['icd9_code'], phenocode),
-                            "view": "pheno",
                         }
 
 def create_autocompleter(phenos):

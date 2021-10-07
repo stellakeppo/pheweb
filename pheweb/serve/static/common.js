@@ -20,7 +20,19 @@ window.debug = window.debug || {};
                 // This especially happens while I'm typing a chrom-pos-ref-alt.  If what I'm typing agrees with something being suggested, it shouldn't disappear!
                 // So, I'm just adding everything to the local index. (Note: NOT localstorage.)
                 // Bloodhound appears to perform deduping.
-		data = data.map((d) => { return {...d, 'url' : `/${d.view}/${d.value}` }; } );
+		data = data.map((d) => {
+		    var { variant , pheno , gene , error } = d;
+		    var url = `/error/${d}`;
+		    if(variant != null){
+			url = `/variant/${variant}`;
+		    } else if (pheno != null){
+			url = `/pheno/${pheno}`;
+		    } else if (gene != null){
+			url = `/gene/${gene}`;
+		    } else if (error != null){
+			url = `/error/${error}`;
+		    }
+		    return {...d, url }; } );
                 autocomplete_bloodhound.add(data);
                 return data;
             },
