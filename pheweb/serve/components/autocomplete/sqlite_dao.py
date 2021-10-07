@@ -101,8 +101,7 @@ class SQLiteAutocompleter(object):
                     else:
                         display = '{} ({})'.format(cpra_display, ','.join(row['rsid'] for row in rowlist))
                         yield {
-                            'value' : cpra,
-                            'view' : 'variant',
+                            'variant' : cpra,
                             'display' : display
                         }
 
@@ -117,8 +116,7 @@ class SQLiteAutocompleter(object):
                         rsid, cpra = row['rsid'], row['cpra']
                         cpra_display = cpra.replace('-', ':', 1)
                         yield {
-                            'value' : cpra_display,
-                            'view' : 'variant',
+                            'variant' : cpra_display,
                             'display': '{} ({})'.format(rsid, cpra_display),
                         }
 
@@ -127,8 +125,7 @@ class SQLiteAutocompleter(object):
         for phenocode, pheno in self._phenos.items():
             if query in pheno['--spaced--phenocode']:
                 yield {
-                    'value' : phenocode,
-                    'view' : 'pheno',
+                    'pheno' : phenocode,
                     'display' : "{} ({})".format(phenocode, pheno['phenostring']) if 'phenostring' in pheno else phenocode, # TODO: truncate phenostring intelligently
                 }
 
@@ -137,8 +134,7 @@ class SQLiteAutocompleter(object):
         for phenocode, pheno in self._phenos.items():
             if query in pheno['--spaced--phenostring']:
                 yield {
-                    'value' : phenocode,
-                    'view' : 'pheno',
+                    'pheno' : phenocode,
                     'display' : "{} ({})".format(pheno['phenostring'], phenocode),
                 }
 
@@ -154,20 +150,17 @@ class SQLiteAutocompleter(object):
                 alias, canonical_symbols = row['alias'], row['canonicals_comma'].split(',')
                 if len(canonical_symbols) > 1:
                     yield {
-                        'view' : 'gene',
-                        'value' : canonical_symbols[0],
+                        'gene' : canonical_symbols[0],
                         'display': '{} (alias for {})'.format(alias, ' and '.join(canonical_symbols)),
                     }
                 elif canonical_symbols[0] == alias:
                     yield {
-                        'view' : 'gene',
-                        'value' : canonical_symbols[0],
+                        'gene' : canonical_symbols[0],
                         "display" : canonical_symbols[0],
                     }
                 else:
                     yield {
-                        'view' : 'gene',
-                        'value' : canonical_symbols[0],
+                        'gene' : canonical_symbols[0],
                         'display' : '{} (alias for {})'.format(alias, canonical_symbols[0]),
                     }
 
