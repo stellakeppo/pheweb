@@ -2,7 +2,6 @@ from ..utils import get_phenolist, get_use_phenos, get_gene_tuples, pad_gene
 from ..conf_utils import conf
 from ..file_utils import common_filepaths
 from .server_utils import get_variant, get_random_page, get_pheno_region
-from .autocomplete import Autocompleter
 from .auth import GoogleSignIn
 from ..version import version as pheweb_version
 
@@ -37,6 +36,7 @@ from .group_based_auth  import verify_membership
 from .server_auth import before_request
 
 from pheweb_colocalization.view import colocalization
+from .components.autocomplete.view import autocomplete
 
 app = Flask(__name__)
 
@@ -62,10 +62,6 @@ if 'GOOGLE_ANALYTICS_TRACKING_ID' in conf:
     app.config['GOOGLE_ANALYTICS_TRACKING_ID'] = conf['GOOGLE_ANALYTICS_TRACKING_ID']
 if 'GLOBAL_SITE_TAG_ID' in conf:
     app.config['GLOBAL_SITE_TAG_ID'] = conf['GLOBAL_SITE_TAG_ID']
-print("..........................................................................................")
-print('GLOBAL_SITE_TAG_ID' in conf)
-print(conf['GLOBAL_SITE_TAG_ID'])
-print("..........................................................................................")
 
 if 'SENTRY_DSN' in conf:
     app.config['SENTRY_DSN'] = conf['SENTRY_DSN']
@@ -115,6 +111,7 @@ if os.path.isdir(conf.custom_templates):
 
 phenos = {pheno['phenocode']: pheno for pheno in get_phenolist()}
 use_phenos = {phenocode: phenos[phenocode] for phenocode in get_use_phenos()}
+app.use_phenos = use_phenos
 
 threadpool = ThreadPoolExecutor(max_workers=4)
 
@@ -122,6 +119,7 @@ jeeves = ServerJeeves( conf )
 
 app.jeeves = jeeves
 app.register_blueprint(colocalization)
+app.register_blueprint(autocomplete)
 
 if "data_dir" in conf:
     path=conf['data_dir'] + "resources"
@@ -197,15 +195,6 @@ def pheno(phenocode):
 def phenolist():
     return jsonify([pheno for pheno in get_phenolist() if pheno['phenocode'] in use_phenos])
 
-autocompleter = Autocompleter(use_phenos)
-@app.route('/api/autocomplete')
-def autocomplete():
-    query = request.args.get('query', '')
-    suggestions = autocompleter.autocomplete(query)
-    if suggestions:
-        return jsonify(sorted(suggestions, key=lambda sugg: sugg['display']))
-    return jsonify([])
-
 @app.route('/go')
 def go():
     query = request.args.get('query', None)
@@ -234,13 +223,14 @@ def variant_page(query):
             die("Sorry, I couldn't find the variant {}".format(query))
  
         variantdat = (variantdat[0], [pheno for pheno in variantdat[1] if pheno.phenocode in use_phenos])
-        print(".variant............")
-        print([pheno for pheno in variantdat[1]])
-        print([ p for p in variantdat[1]])
-        print(".variant............")        
         regions = jeeves.get_finemapped_regions(v)
         if regions is not None:
             regions = [region for region in regions if region['phenocode'] in use_phenos]
+        print(".variant............")
+        print(variantdat[0])
+        print(variantdat[0].rsids)
+        print(".variant............")        
+            
         return render_template('variant.html',
                                variant=variantdat[0],
                                results=variantdat[1],

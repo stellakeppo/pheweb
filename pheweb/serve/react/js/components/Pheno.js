@@ -303,11 +303,7 @@ class Pheno extends React.Component {
 	    </div> :
 	<div>loading</div>
 
-	const is_cs = this.state.credibleSets == null ?
-		"" :
-		this.state.credibleSets.length == 0 ? 
-		". No credible sets for this phenotype." : 
-		""	
+	const is_cs = "";		""	
 
 	const risteys = window.browser == 'FINNGEN' ?
 	    <p style={{marginBottom: '10px'}}><a style={{fontSize:'1.25rem', padding: '.25rem .5rem', backgroundColor: '#2779bd', color: '#fff', borderRadius: '.25rem', fontWeight: 700, boxShadow: '0 0 5px rgba(0,0,0,.5)'}}
@@ -325,14 +321,8 @@ class Pheno extends React.Component {
 		<h3>Lead variants{is_cs}</h3>
 		<Tabs forceRenderTabPanel={true} selectedIndex={this.state.selectedTab} onSelect={this.onTabSelect} style={{width: '100%'}}>
 		<TabList>
-		<Tab>Credible Sets</Tab>
 		<Tab>Traditional</Tab>
 		</TabList>
-		<TabPanel style={{ display: this.state.selectedTab == 0 ? 'block' : 'none'}}>
-			<div id="cs table" style={{height: '100%', width: '100%'}}>
-				{cs_table}
-			</div>
-		</TabPanel>
 		<TabPanel style={{ display: this.state.selectedTab == 1 ? 'block' : 'none'}}>
 			<div id="traditional table" style={{height: '100%', width: '100%'}}>
 				{var_table}

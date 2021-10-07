@@ -204,7 +204,9 @@ class ServerJeeves(object):
         ## chaining variants like thise retains all the existing annotations.
         r = self.result_dao.get_single_variant_results(variant)
         v_annot = self.annotation_dao.get_single_variant_annotations(r[0], self.conf.anno_cpra)
-        
+        print("get_single_variant_data-----------------------------------")
+        print(r)
+        print("get_single_variant_data-----------------------------------")
         if r is not None:
             if v_annot is None:
                 ## no annotations found even results were found. Should not happen except if the results and annotation files are not in sync

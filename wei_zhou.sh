@@ -17,9 +17,6 @@ export PYTHONPATH
 cd "$PROJECT_DIR"
 [ -d "generated-by-pheweb" ] && rm -rf generated-by-pheweb
 mkdir -p generated-by-pheweb/{pheno,parsed,sites,manhattan,qq,pheno_gz}
-cp /mnt/nfs_dev/pheweb/r6/generated-by-pheweb/sites/sites.tsv generated-by-pheweb/sites/sites.tsv
-cp /mnt/nfs_dev/pheweb/r6/generated-by-pheweb/sites/sites-unannotated.tsv generated-by-pheweb/sites/sites-unannotated.tsv
-cp /mnt/nfs_dev/pheweb/r6_test/generated-by-pheweb/sites/sites.tsv.noheader generated-by-pheweb/sites/sites.tsv.noheader
 
 ALL_PHENOS=()
 
@@ -74,13 +71,22 @@ do
       echo " , " >> "$PHONO_LIST_TMP_FILE"
     fi
 
-    gsutil cat "$BUCKET_PATH" | zcat | sed '1 s/#CHR/chrom/ ; 1 s/POS/pos/ ; 1 s/#CHR/chrom/ ; 1 s/POS/pos/ ; 1 s/REF/ref/ ; 1 s/ALT/alt/ ; 1 s/SNP/snp/ ; 1 s/inv_var_meta_p/pval/ ; 1 s/inv_var_meta_beta/beta/ ; 1 s/inv_var_meta_sebeta/sebeta/ ' | awk -F"\t" '{ if($15 > 1) { print }}' | awk -F"\t"  ' { t = $5; $5 = $9; $9 = t; print; } ' OFS=$'\t'   > "$ASSOC_FILE"
+    gsutil cat "$BUCKET_PATH" | \
+	zcat | \
+	sed '1 s/#CHR/chrom/ ; 1 s/POS/pos/ ; 1 s/#CHR/chrom/ ; 1 s/POS/pos/ ; 1 s/REF/ref/ ; 1 s/ALT/alt/ ; 1 s/SNP/snp/ ; 1 s/inv_var_meta_p/pval/ ; 1 s/inv_var_meta_beta/beta/ ; 1 s/inv_var_meta_sebeta/sebeta/ ' | \
+	awk -F"\t" '{ if($15 > 1) { print }}' | awk -F"\t"  ' { t = $5; $5 = $9; $9 = t; print; } ' OFS=$'\t' | \
+	tee >(cut -d$'\t'   -f1-3 >> generated-by-pheweb/sites/sites.tsv.dup ) \
+	    >( sed '1 s/chrom/#chrom/ ; 1 s/rsid/rsids/ ; ' > generated-by-pheweb/pheno_gz/${PHENOCODE} )  > "$ASSOC_FILE"
     printf '%s\t%s\t%s\t%s\t%s\n' "$PHENOCODE" "$PHENOSTRING" "$NUM_CASES" "$NUM_CONTROL" "$ASSOC_FILE"  >> generated-by-pheweb/pheno_config.txt
+    ( bgzip generated-by-pheweb/pheno_gz/${PHENOCODE} ;
+      tabix -S 1 -b 2 -e 2 -s 1 generated-by-pheweb/pheno_gz/${PHENOCODE}.gz )&
     
     ALL_PHENOS+=("$PHENOCODE")
     
 done < "$INVENTORY_CATALOG"
 echo "]" >> "$PHONO_LIST_TMP_FILE"
+
+cat generated-by-pheweb/sites/sites.tsv.dup | sort -t$'\t' -k1,1n -k2,2n -k3,3 | uniq > generated-by-pheweb/sites/sites.tsv
 
 # check and do the exact same as
 #  wdl/import.wdl
@@ -97,6 +103,7 @@ pheweb make-gene-aliases-sqlite3
 pheweb augment-phenos
 pheweb manhattan
 
+sed '1d' generated-by-pheweb/sites/sites.tsv > generated-by-pheweb/sites/sites.tsv.noheader
 python3 "$PHEWEB_ROOT/pheweb/load/external_matrix.py" \
        generated-by-pheweb/pheno_config.txt \
        generated-by-pheweb/ \
@@ -121,10 +128,8 @@ done
 pheweb qq
 mv $PHONO_LIST_TMP_FILE pheno-list.json
 
-for PHENOCODE in "${ALL_PHENOS[@]}"
-do
-
-    cat generated-by-pheweb/pheno/$PHENOCODE | sed '1 s/chrom/#chrom/ ; 1 s/rsid/rsids/ ; ' > generated-by-pheweb/pheno_gz/${PHENOCODE}
-    bgzip generated-by-pheweb/pheno_gz/${PHENOCODE}
-    tabix -S 1 -b 2 -e 2 -s 1 generated-by-pheweb/pheno_gz/${PHENOCODE}.gz
-done
+# for PHENOCODE in "${ALL_PHENOS[@]}"
+# do
+#     bgzip generated-by-pheweb/pheno_gz/${PHENOCODE}
+#     tabix -S 1 -b 2 -e 2 -s 1 generated-by-pheweb/pheno_gz/${PHENOCODE}.gz
+# done
