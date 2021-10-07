@@ -2,7 +2,6 @@ from ..utils import get_phenolist, get_use_phenos, get_gene_tuples, pad_gene
 from ..conf_utils import conf
 from ..file_utils import common_filepaths
 from .server_utils import get_variant, get_random_page, get_pheno_region
-from .autocomplete import Autocompleter
 from .auth import GoogleSignIn
 from ..version import version as pheweb_version
 
@@ -38,6 +37,8 @@ from .server_auth import before_request
 
 from pheweb_colocalization.view import colocalization
 from .components.config_ui.view import config_ui
+from .components.autocomplete.view import autocomplete
+
 app = Flask(__name__)
 
 ## allows debug statements in jinja
@@ -107,6 +108,7 @@ if os.path.isdir(conf.custom_templates):
 
 phenos = {pheno['phenocode']: pheno for pheno in get_phenolist()}
 use_phenos = {phenocode: phenos[phenocode] for phenocode in get_use_phenos()}
+app.use_phenos = use_phenos
 
 threadpool = ThreadPoolExecutor(max_workers=4)
 
@@ -115,6 +117,8 @@ jeeves = ServerJeeves( conf )
 app.jeeves = jeeves
 app.register_blueprint(colocalization)
 app.register_blueprint(config_ui)
+app.register_blueprint(autocomplete)
+
 
 if "data_dir" in conf:
     path=conf['data_dir'] + "resources"
@@ -185,15 +189,6 @@ def pheno(phenocode):
 @app.route('/api/phenos')
 def phenolist():
     return jsonify([pheno for pheno in get_phenolist() if pheno['phenocode'] in use_phenos])
-
-autocompleter = Autocompleter(use_phenos)
-@app.route('/api/autocomplete')
-def autocomplete():
-    query = request.args.get('query', '')
-    suggestions = autocompleter.autocomplete(query)
-    if suggestions:
-        return jsonify(sorted(suggestions, key=lambda sugg: sugg['display']))
-    return jsonify([])
 
 @app.route('/go')
 def go():
