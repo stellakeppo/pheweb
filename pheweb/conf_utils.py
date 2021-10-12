@@ -1,4 +1,4 @@
-
+from typing import List
 # This module creates the object `conf`.
 # It also offers some configuration-related utility functions.
 
@@ -577,4 +577,23 @@ def _ensure_conf():
     conf.set_default_value("show_risteys", False)
     conf.set_default_value("lof_threshold", 1e-3)
     conf.set_default_value("GLOBAL_SITE_TAG_ID", None)
+    conf.set_default_value("STRICT_SCHEMA", True)
 
+def get_field_parser(colname : str,strict_schema : bool = conf.STRICT_SCHEMA):
+    if colname in conf.parse.fields:
+        return conf.parse.fields[colname]['_read']
+    elif not strict_schema:
+        return lambda x : x
+    else:
+        raise KeyError("{field} not found in parse.fields")
+    
+def validate_fields(colnames : List[str],strict_schema : bool = conf.STRICT_SCHEMA):
+    if not strict_schema:
+        for field in colnames:
+            assert field in conf.parse.per_variant_fields or field in conf.parse.per_assoc_fields, (field)
+        return True
+    else:
+
+        return True
+
+    

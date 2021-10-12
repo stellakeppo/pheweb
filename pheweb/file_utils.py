@@ -117,8 +117,7 @@ def VariantFileReader(filepath, only_per_variant_fields=False):
     with open(filepath, 'rt') as f:
         reader = csv.reader(f, dialect='pheweb-internal-dialect')
         fields = next(reader)
-        for field in fields:
-            assert field in conf.parse.per_variant_fields or field in conf.parse.per_assoc_fields,f'{field} not found'
+        assert validate_fields(fields), f"failed validating {fields}"
         if only_per_variant_fields:
             yield _vfr_only_per_variant_fields(fields, reader)
         else:
@@ -159,8 +158,7 @@ def IndexedVariantFileReader(phenocode):
         colnames = next(reader)
     assert colnames[0].startswith('#')
     colnames[0] = colnames[0][1:]
-    for field in colnames:
-        assert field in conf.parse.per_variant_fields or field in conf.parse.per_assoc_fields, (field)
+    assert validate_fields(colnames), f"failed validating {fields}" 
     colidxs = {field: colnum for colnum, field in enumerate(colnames)}
 
     with pysam.TabixFile(filepath, parser=None) as tabix_file:
