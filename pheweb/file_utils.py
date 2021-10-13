@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from pathlib import Path
 
 import io
@@ -12,7 +12,8 @@ from boltons.fileutils import AtomicSaver, mkdir_p
 import pysam
 
 from .utils import PheWebError, get_phenolist, chrom_order
-from .conf_utils import conf
+from .conf_utils import conf, get_field_parser, validate_fields
+
 
 
 def get_generated_path(*path_parts):
@@ -108,7 +109,8 @@ def get_filepath(kind: str, *, must_exist: bool = True) -> str:
     return filepath
 
 
-def get_tmp_path(arg):
+def get_tmp_path(arg: Union[Path, str]) -> str:
+    arg = str(arg)
     if arg.startswith(get_generated_path()):
         mkdir_p(get_generated_path("tmp"))
         tmp_basename = (

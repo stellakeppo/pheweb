@@ -16,12 +16,15 @@ except:
 
 
 def Attrdict():
-    # LATER: make this a real class  which defines the attributes it may have, and then move conf.parse to its own module.
+    # LATER: make this a real class  which defines the attributes
+    # it may have, and then move conf.parse to its own module.
     defaults = {}
     attrs = {}
 
     class _Attrdict:
-        """like dict but dict.key is a proxy for dict[key], and dict.set_default_value(key, value) sets a default."""
+        """like dict but dict.key is a proxy for dict[key],
+        and dict.set_default_value(key, value) sets a default."""
+
 
         def __getattr__(self, attr):
             try:
@@ -137,19 +140,16 @@ def _ensure_conf():
                 mkdir_p(conf.cache)
             except PermissionError:
                 print(
-                    "Warning: caching is disabled because the directory {!r} can't be created.\n".format(
-                        conf.cache
-                    )
-                    + "If you don't want caching, set `cache = False` in your config.py."
+                    f"""Warning: caching is disabled because the directory {conf.cache} can't be created.
+                        If you don't want caching, set `cache = False` in your config.py."""
                 )
                 conf.cache = False
                 return
         if not os.access(conf.cache, os.R_OK):
             print(
-                "Warning: the directory {!r} is configured to be your cache directory but it is not readable.\n".format(
-                    conf.cache
-                )
-                + "If you don't want caching, set `cache = False` in your config.py."
+                f"""Warning: the directory {conf.cache} is configured to be your cache
+                    directory but it is not readable.
+                    If you don't want caching, set `cache = False` in your config.py."""
             )
             conf.cache = False
 
@@ -176,9 +176,8 @@ def _ensure_conf():
                 _auth_module = imp.load_source("config", conf.authentication_file)
             except Exception:
                 raise utils.PheWebError(
-                    "PheWeb tried to load your authentication file at {!r} but it failed.".format(
-                        conf.authentication_file
-                    )
+                    f"""PheWeb tried to load your authentication file at
+                        {conf.authentication_file} but it failed."""
                 )
             else:
                 for key in dir(_auth_module):
@@ -208,7 +207,9 @@ def _ensure_conf():
 
     if "minimum_maf" in conf:
         raise utils.PheWebError(
-            "minimum_maf has been deprecated.  Please remove it and use assoc_min_maf and/or variant_inclusion_maf instead"
+            """minimum_maf has been deprecated.
+               Please remove it and use assoc_min_maf
+               and/or variant_inclusion_maf instead"""
         )
 
     if conf.get("login", {}).get("whitelist", None):
@@ -860,7 +861,7 @@ def _ensure_conf():
     conf.set_default_value("show_risteys", False)
     conf.set_default_value("lof_threshold", 1e-3)
     conf.set_default_value("GLOBAL_SITE_TAG_ID", None)
-    conf.set_default_value("STRICT_SCHEMA", True)
+    conf.set_default_value("STRICT_SCHEMA", False)
 
 
 def get_field_parser(colname: str, strict_schema: bool = conf.STRICT_SCHEMA):
@@ -874,7 +875,7 @@ def get_field_parser(colname: str, strict_schema: bool = conf.STRICT_SCHEMA):
     elif not strict_schema:
         return lambda x: x
     else:
-        raise KeyError("{field} not found in parse.fields")
+        raise KeyError(f"{colname} not found in {conf.parse.fields}")
 
 
 def validate_fields(colnames: List[str], strict_schema: bool = conf.STRICT_SCHEMA):
@@ -886,4 +887,4 @@ def validate_fields(colnames: List[str], strict_schema: bool = conf.STRICT_SCHEM
             assert (
                 field in conf.parse.per_variant_fields
                 or field in conf.parse.per_assoc_fields
-            ), field
+            ), f"{field} not found"
