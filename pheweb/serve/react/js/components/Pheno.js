@@ -64,7 +64,6 @@ class Pheno extends React.Component {
             .then( response => {
                 if(response && "pheno" in response){
                     const config = response["pheno"];
-                    console.log(config);
                     if("Traditional" in config){
                         var columns = config["Traditional"];
                         columns = (columns == null)?[]:columns.map(constructColumn);
@@ -189,9 +188,8 @@ class Pheno extends React.Component {
 	}
 	
     download() {
-	const data = this.state.selectedTab == 0 ?
-	      this.cstable.getResolvedState().sortedData.map(datum => Object.keys(datum).reduce((acc, cur) => { if (!cur.startsWith('_')) acc[cur]=datum[cur]; return acc}, {})) :
-	      this.vartable.getResolvedState().sortedData.map(datum => Object.keys(datum).reduce((acc, cur) => { if (!cur.startsWith('_')) acc[cur]=datum[cur]; return acc}, {}))
+	const table = (this.state.selectedTab == 0 ? (this.cstable|| this.vartable): (this.vartable || this.cstable)); 
+	const data = table.getResolvedState().sortedData.map(datum => Object.keys(datum).reduce((acc, cur) => { if (!cur.startsWith('_')) acc[cur]=datum[cur]; return acc}, {})); 
 	this.setState({
 	    dataToDownload: data
 	}, () => {
@@ -276,15 +274,7 @@ class Pheno extends React.Component {
 	    <div className="btn btn-primary" onClick={this.download}>Download table</div>
 	    </div>
 	    </div>
-            <CSVLink
-	headers={this.state.headers}
-	data={this.state.dataToDownload}
-	separator={'\t'}
-	enclosingCharacter={''}
-	filename={this.state.selectedTab == 0 ? `finngen_${window.release}_${pheno.phenocode}_autorep.tsv` : `finngen_${window.release}_${pheno.phenocode}_lead.tsv`}
-	className="hidden"
-	ref={(r) => this.csvLink = r}
-	target="_blank" />
+            
 	    </div> :
 	<div>loading</div>
 	    
@@ -334,6 +324,15 @@ class Pheno extends React.Component {
 	const traditional = <><h4>Traditional</h4>{var_table}</>;
 	const credibleSet = <><h4>Credible Sets</h4>{cs_table}</>;
 
+	const csvLink = <CSVLink headers={this.state.headers}
+	                 data={this.state.dataToDownload}
+	                 separator={'\t'}
+	                 enclosingCharacter={''}
+	                 filename={this.state.selectedTab == 0 ? `${window.browser}_${window.release}_${pheno.phenocode}_autorep.tsv` : `${window.browser}_${window.release}_${pheno.phenocode}_lead.tsv`}
+	                 className="hidden"
+	                 ref={(r) => this.csvLink = r}
+	                 target="_blank" />
+	    
 	const tabPanel = (this.state.columns.length != 0 && this.state.csColumns.length != 0)?
 	      <Tabs forceRenderTabPanel={true} selectedIndex={this.state.selectedTab} onSelect={this.onTabSelect} style={{width: '100%'}}>
 	        <TabList>
@@ -361,6 +360,7 @@ class Pheno extends React.Component {
 		<table className='column_spacing'>
 		{n_cc1}
 		</table>
+	        {csvLink}
                 {ukbb}
 		<div id='manhattan_plot_container' />
 		<h3>Lead variants{is_cs}</h3>

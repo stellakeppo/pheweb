@@ -1121,7 +1121,6 @@ const constructColumn = (param) => {
 			  Cell: formatter in formatters ? formatters[formatter]:text_formatter ,
 			  ...(minWidth && { minWidth })
 			};
-	console.log(column);
 	return column;
     }
     
