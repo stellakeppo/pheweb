@@ -882,7 +882,7 @@ def validate_fields(colnames: List[str], strict_schema: bool = conf.STRICT_SCHEM
     """
     Checks by assertion the fields are valid
     """
-    if not strict_schema:
+    if strict_schema:
         for field in colnames:
             assert (
                 field in conf.parse.per_variant_fields

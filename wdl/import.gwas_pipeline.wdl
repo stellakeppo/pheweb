@@ -137,6 +137,16 @@ task annotation {
         echo "-----------------------------------------------"
         df -h && pheweb make-tries
 
+        echo "-----------------------------------------------"
+        echo "make-cpras-rsids-sqlite3"
+        echo "-----------------------------------------------"
+        df -h && pheweb make-cpras-rsids-sqlite3
+	
+        echo "-----------------------------------------------"
+        echo "make-gene-aliases-sqlite3"
+        echo "-----------------------------------------------"
+        df -h && pheweb make-gene-aliases-sqlite3
+
         ls
 
     }
