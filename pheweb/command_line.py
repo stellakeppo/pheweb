@@ -169,6 +169,7 @@ def main():
         from .file_utils import get_dated_tmp_path
         import traceback
         exc_filepath = get_dated_tmp_path('exception')
+        print(traceback.format_exc(), file=sys.stderr)
         with open(exc_filepath, 'w') as f:
             f.write(traceback.format_exc())
         if isinstance(exc, PheWebError): print(exc)
