@@ -99,3 +99,23 @@ def get_gene_tuples(include_ensg=False):
                 yield (row[0], int(row[1]), int(row[2]), row[3], row[4])
             else:
                 yield (row[0], int(row[1]), int(row[2]), row[3])
+
+def convert_mlogp(v):
+    """ Used to populate mlogp when not 
+        supplied.
+    """
+    if v > 0:
+        # default to calculating from the pval        
+        return -math.log10(v)
+    else:
+        # special case if pval is zero
+        # as it could be a tiny number
+        # that gets rounded to zero
+        # the ui interprets this as
+        # mlogp >> 324
+        # this is problematic and will be
+        # addressed in issue #137
+        return 324
+
+assert convert_mlogp(0) == 324
+

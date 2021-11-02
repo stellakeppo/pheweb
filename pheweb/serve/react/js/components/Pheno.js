@@ -331,7 +331,7 @@ class Pheno extends React.Component {
 	const traditional = <><h4>Traditional</h4>{var_table}</>;
 	const credibleSet = <><h4>Credible Sets</h4>{cs_table}</>;
 	const summary = this.state.summary != null && this.state.pheno != null?
-	      <div dangerouslySetInnerHTML={{ __html: Handlebars.compile(this.state.summary)(this.state.pheno) }}></div>
+	      <div dangerouslySetInnerHTML={{ __html: Handlebars.compile(this.state.summary)(this.state) }}></div>
 	      :
 	      <></>;
 	const handlebars = this.state.summary != null && this.state.pheno != null?Handlebars.compile(this.state.summary)(this.state.pheno):null;

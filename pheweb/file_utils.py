@@ -12,9 +12,7 @@ from boltons.fileutils import AtomicSaver, mkdir_p
 import pysam
 
 from .utils import PheWebError, get_phenolist, chrom_order
-from .conf_utils import conf, get_field_parser, validate_fields
-
-
+from .conf_utils import conf, get_field_parser, validate_fields, get_field_parser
 
 def get_generated_path(*path_parts):
     return os.path.join(conf.data_dir, "generated-by-pheweb", *path_parts)
@@ -174,12 +172,7 @@ class _vfr:
         return self._get_variants()
 
     def _get_variants(self):
-        parsers = [
-            conf.parse.fields[field]["_read"]
-            if field in conf.parse.fields
-            else lambda x: x
-            for field in self.fields
-        ]
+        parsers = [ get_field_parser(field) for field in self.fields ]
         for unparsed_variant in self._reader:
             assert len(unparsed_variant) == len(self.fields)
             variant = {
@@ -192,8 +185,8 @@ class _vfr:
 class _vfr_only_per_variant_fields:
     def __init__(self, fields, reader):
         self._all_fields = fields
-        self._extractors = [
-            (conf.parse.fields[field]["_read"], field, colidx)
+        self._extractors = [ 
+            (get_field_parser(field), field, colidx)
             for colidx, field in enumerate(fields)
             if field in conf.parse.per_variant_fields
         ]
@@ -238,7 +231,7 @@ class _ivfr:
         variant = {}
         for field in self._colidxs:
             val = variant_row[self._colidxs[field]]
-            parser = conf.parse.fields[field]["_read"]
+            parser = get_field_parser(field)
             try:
                 variant[field] = parser(val)
             except Exception as exc:
@@ -354,7 +347,7 @@ class _mr(_ivfr):
         if val == "NA":
             print("Warning: replacing NA with 1: " + field + " " + str(phenocode))
             val = 1
-        parser = conf.parse.fields[field]["_read"]
+        parser = get_field_parser(field)
         try:
             return parser(val)
         except Exception as exc:

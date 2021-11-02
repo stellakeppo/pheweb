@@ -1,6 +1,8 @@
 
 from ..file_utils import MatrixReader, IndexedVariantFileReader, common_filepaths
+from ..utils import convert_mlogp
 
+import math
 import random
 import re
 import itertools
@@ -43,7 +45,10 @@ class _Get_Pheno_Region:
                     _Get_Pheno_Region._rename(v, 'af_alt_controls', 'maf_controls')
                 if v['pvalue'] < p_threshold:
                     variants.append(v)
-
+                if 'mlogp' not in v and 'pvalue' in v:
+                    v['mlogp'] = convert_mlogp(v['pvalue'])
+                print(v)
+                
         df = _Get_Pheno_Region._dataframify(variants)
 
         return {
