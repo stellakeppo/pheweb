@@ -5,6 +5,8 @@ import { CSVLink } from 'react-csv'
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
 import { phenoTableCols, csTableCols, csInsideTableCols , pval_sentinel , constructColumn } from '../tables.js'
 import { create_gwas_plot, create_qq_plot } from '../pheno.js'
+import * as Handlebars from 'handlebars';
+
 
 class Pheno extends React.Component {
 
@@ -20,7 +22,8 @@ class Pheno extends React.Component {
 	    
 	    dataToDownload: [],
 	    locus_groups: {},
-	    selectedTab: 0
+	    selectedTab: 0,
+	    summary : null
 	}
 	
 	this.resp_json = this.resp_json.bind(this)
@@ -73,6 +76,10 @@ class Pheno extends React.Component {
 			var csColumns = config["Credible Sets"];
                         csColumns = (csColumns == null)?[]:csColumns.map(constructColumn);
 			this.setState({ csColumns });
+		    }
+		    if("Summary" in config){
+			var summary = config["Summary"];
+			this.setState({ summary });
 		    }
                 }
             })
@@ -323,7 +330,14 @@ class Pheno extends React.Component {
 
 	const traditional = <><h4>Traditional</h4>{var_table}</>;
 	const credibleSet = <><h4>Credible Sets</h4>{cs_table}</>;
-
+	const summary = this.state.summary != null && this.state.pheno != null?
+	      <div dangerouslySetInnerHTML={{ __html: Handlebars.compile(this.state.summary)(this.state.pheno) }}></div>
+	      :
+	      <></>;
+	const handlebars = this.state.summary != null && this.state.pheno != null?Handlebars.compile(this.state.summary)(this.state.pheno):null;
+	console.log(handlebars);
+	console.log(`summary : {this.state.summary} , pheno : {this.state.pheno} `);
+	
 	const csvLink = <CSVLink headers={this.state.headers}
 	                 data={this.state.dataToDownload}
 	                 separator={'\t'}
@@ -360,6 +374,7 @@ class Pheno extends React.Component {
 		<table className='column_spacing'>
 		{n_cc1}
 		</table>
+                {summary}
 	        {csvLink}
                 {ukbb}
 		<div id='manhattan_plot_container' />
