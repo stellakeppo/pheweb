@@ -320,7 +320,7 @@ class Pheno extends React.Component {
 	const is_cs = this.state.credibleSets == null ?
 		"" :
 		this.state.credibleSets.length == 0 ? 
-		". No credible sets for this phenotype." : 
+		"" : 
 		""	
 
 	const risteys = window.browser == 'FINNGEN' ?
@@ -328,7 +328,7 @@ class Pheno extends React.Component {
 	href={'https://risteys.finngen.fi/phenocode/' + this.state.pheno.phenocode.replace('_EXALLC', '').replace('_EXMORE', '')} target="_blank">RISTEYS</a></p> : null
 
 
-	const traditional = <><h4>Traditional</h4>{var_table}</>;
+	const traditional = <><h4></h4>{var_table}</>;
 	const credibleSet = <><h4>Credible Sets</h4>{cs_table}</>;
 	const summary = this.state.summary != null && this.state.pheno != null?
 	      <div dangerouslySetInnerHTML={{ __html: Handlebars.compile(this.state.summary)(this.state) }}></div>
@@ -378,7 +378,7 @@ class Pheno extends React.Component {
 	        {csvLink}
                 {ukbb}
 		<div id='manhattan_plot_container' />
-		<h3>Lead variants{is_cs}</h3>
+		<h3>{is_cs}</h3>
 	        {tabPanel}
 		<div style={{float:'left'}}>
 		<h3>QQ plot</h3>
