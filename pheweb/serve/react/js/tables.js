@@ -54,7 +54,7 @@ const truncateString = (s,l) => {
     return s.split(";").length > l ? s.split(";").slice(0,l).join(";")+"...": s
 }
 
-const optionalFloat = (props) =>  isNaN(+props.value) ? 'NA' : props.value.toPrecision(3)
+const optionalFloat = (props) =>  isNaN(+props.value) ? 'NA' : (+props.value).toPrecision(3)
 
 const regionBuilder = (s,r) => {
     const tmp = s.replace("chr23","chrX").replace("chr","").split("_")
@@ -282,7 +282,7 @@ const phenoColumn = {
     { Header: () => (<span title="INFO score" style={{textDecoration: 'underline'}}>INFO</span>),
       accessor: 'info',
       filterMethod: (filter, row) => row[filter.id] >= +filter.value,
-      Cell: props => isNaN(+props.value) ? 'NA' : props.value.toPrecision(3),
+      Cell: props => isNaN(+props.value) ? 'NA' : (+props.value).toPrecision(3),
       minWidth: 80
     },
 
@@ -337,7 +337,7 @@ const phenoColumn = {
 	Header: () => (<span title="mlog" style={{textDecoration: 'underline'}}>-log10(p)</span>), 
 	accessor: 'mlogp', 
 	filterMethod: (filter, row) => row[filter.id] >= +filter.value, 
-	Cell: props => isNaN(+props.value) ? 'NA' : props.value.toPrecision(3), 
+	Cell: props => isNaN(+props.value) ? 'NA' : (+props.value).toPrecision(3), 
 	minWidth: 80,
 	id: 'mlogp'
     },
@@ -411,7 +411,7 @@ const phenoTableCols = {
 		      { Header: () => (<span title="INFO score in FinnGen" style={{textDecoration: 'underline'}}>INFO FG</span>),
 			accessor: 'info',
 			filterMethod: (filter, row) => row[filter.id] >= +filter.value,
-			Cell: props => isNaN(+props.value) ? 'NA' : props.value.toPrecision(3),
+			Cell: props => isNaN(+props.value) ? 'NA' : (+props.value).toPrecision(3),
 			minWidth: 80
 		      },
 		      { Header: () => (<span title="AF enrichment FIN / Non-Finnish-non-Estonian European" style={{textDecoration: 'underline'}}>FIN enrichment</span>),
@@ -440,7 +440,7 @@ const phenoTableCols = {
 		    { Header: () => (<span title="INFO score in FinnGen" style={{textDecoration: 'underline'}}>INFO FG</span>),
 		      accessor: 'info',
 		      filterMethod: (filter, row) => row[filter.id] >= +filter.value,
-		      Cell: props => isNaN(+props.value) ? 'NA' : props.value.toPrecision(3),
+		      Cell: props => isNaN(+props.value) ? 'NA' : (+props.value).toPrecision(3),
 		      minWidth: 80
 		    },
 		    { Header: () => (<span title="AF enrichment FIN / Non-Finnish-non-Estonian European" style={{textDecoration: 'underline'}}>FIN enrichment</span>),
@@ -808,7 +808,7 @@ const chipTableCols = [{
 	return isNaN(+props.value) ? '' :
 	    <div style={{color: +props.original['pval'] < 5e-8 ? 'rgb(25,128,5,1)'
  			 : 'inherit'}}>
-	    {props.value.toExponential(1)}
+	    {(+props.value).toExponential(1)}
 	</div>
     }
 }, {
@@ -981,7 +981,7 @@ const codingTableCols = [{
     accessor: 'AF',
     width: Math.min(60, 60/maxTableWidth*window.innerWidth),
     filterMethod: (filter, row) => row[filter.id] <= filter.value,
-    Cell: props => isNaN(+props.value) ? 'NA' : props.value.toExponential(1)
+    Cell: props => isNaN(+props.value) ? 'NA' : (+props.value).toExponential(1)
 }, {
     Header: () => (<span title="af_fin/af_nfsee in gnomAD exomes (-2 when fin.AC == nfsee.AC == 0, -1 when fin.AC == fin.AN == 0)" style={{textDecoration: 'underline'}}>FIN enr</span>),
     accessor: 'enrichment_nfsee',
@@ -999,7 +999,7 @@ const codingTableCols = [{
     accessor: 'INFO',
     filterMethod: (filter, row) => row[filter.id] >= filter.value,
     width: Math.min(60, 60/maxTableWidth*window.innerWidth),
-    Cell: props => isNaN(+props.value) ? 'NA' : props.value.toPrecision(3)
+    Cell: props => isNaN(+props.value) ? 'NA' : (+props.value).toPrecision(3)
 }, {
     Header: () => (<span title="p-value in FinnGen" style={{textDecoration: 'underline'}}>pval</span>),
     accessor: 'pval',
@@ -1009,7 +1009,7 @@ const codingTableCols = [{
 	return isNaN(+props.value) ? '' :
 	    <div style={{color: +props.original['pval'] < 5e-8 ? 'rgb(25,128,5,1)'
  			 : 'inherit'}}>
-	    {props.value.toExponential(1)}
+	    {(+props.value).toExponential(1)}
 	</div>
     }
 }, {
@@ -1019,7 +1019,7 @@ const codingTableCols = [{
     filterMethod: (filter, row) => Math.abs(row[filter.id]) > filter.value,
     Cell: props => {
         return isNaN(+props.value) ? '' :
-        props.value.toPrecision(3)
+            (+props.value).toPrecision(3)
     }
 }, {
     Header: () => (<span title="posterior inclusion probability in FinnGen" style={{textDecoration: 'underline'}}>PIP</span>),
@@ -1029,7 +1029,7 @@ const codingTableCols = [{
     sortMethod: naSmallSorter,
     Cell: props => {
         return isNaN(+props.value) ? 'NA' :
-        props.value.toPrecision(3)
+            (+props.value).toPrecision(3)
     }
 }, {
     Header: () => (<span title="recessive p-value in FinnGen" style={{textDecoration: 'underline'}}>rec p</span>),
@@ -1041,7 +1041,7 @@ const codingTableCols = [{
 	return isNaN(+props.value) ? 'NA' :
 	    <div style={{color: +props.original['pval_recessive'] < 5e-8 ? 'rgb(25,128,5,1)'
  			 : 'inherit'}}>
-	    {props.value.toExponential(1)}
+	    {(+props.value).toExponential(1)}
 	</div>
     }
 }, {
@@ -1064,8 +1064,7 @@ const codingTableCols = [{
     filterMethod: (filter, row) => row[filter.id] <= filter.value,
     sortMethod: naSorter,
     Cell: props => {
-	return isNaN(+props.value) ? 'NA' :
-	    props.value.toPrecision(3)
+	return isNaN(+props.value) ? 'NA' : (+props.value).toPrecision(3)
     }
 }, window.release == 'R4' ?
 			 {

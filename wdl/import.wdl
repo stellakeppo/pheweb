@@ -99,7 +99,7 @@ task annotation {
      Int mem
   
      File? rsids_file
-     File? bed_file
+     File bed_file
 
      File variant_list
     
@@ -215,7 +215,7 @@ task pheno {
 task matrix {
 
     File sites
-    File? bed_file
+    File bed_file
     Array[File] pheno_gz
     Array[File] manhattan
     String docker
@@ -353,7 +353,7 @@ workflow import_pheweb {
   
 	 Array[String] pheno_files = read_lines(summary_files)
 
-	 File? bed_file
+	 File bed_file
 	 File? rsids_file
 
 	 scatter (pheno_file in pheno_files) {
