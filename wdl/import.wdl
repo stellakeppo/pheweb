@@ -373,42 +373,22 @@ task matrix {
 
 workflow import_pheweb {
 	 String docker
-	 String summary_files
+	 String preprocessed_files
 	 String? file_affix
-
+         File variant_list
+  
          Int disk
          Int mem
   
-	 Array[String] pheno_files = read_lines(summary_files)
+	 Array[String] pheno_files = read_lines(preprocessed_files)
          # get file from here https://resources.pheweb.org/
          # https://resources.pheweb.org/genes-v37-hg38.bed
 	 File bed_file
 	 File? rsids_file
 
 	 scatter (pheno_file in pheno_files) {
-	    call preprocess { input :
-               summary_file = pheno_file ,
-               docker = docker ,
-	       }
-         }
-
-	 call sites { input :
-           summary_files = preprocess.out_file ,
-           docker = docker,
-	   disk=disk
-         }
-
-	 call annotation { input :
-            variant_list = sites.variant_list ,
-	    mem = mem ,  
-	    bed_file = bed_file ,
-	    rsids_file = rsids_file ,
-            docker = docker
-         }
-	 
-	 scatter (pheno_file in preprocess.out_file) {
 	 	 call pheno { input :
-	 	      	      variant_list = annotation.sites_list ,
+	 	      	      variant_list = variant_list ,
 	       	      	      pheno_file = pheno_file ,
 	       	       	      file_affix = if defined(file_affix) then file_affix else "",
               	       	      docker = docker
@@ -416,7 +396,7 @@ workflow import_pheweb {
 	}
 
         call matrix { input:
-	              sites=annotation.sites_list ,
+	              sites=variant_list ,
 		      pheno_gz=pheno.pheno_gz,
 		      manhattan=pheno.pheno_manhattan,
 		      bed_file = bed_file,
