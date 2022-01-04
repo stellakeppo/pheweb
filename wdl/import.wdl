@@ -274,27 +274,28 @@ task matrix {
         split -d -l $n_batch --additional-suffix pheno_piece pheno_config.txt
 
         tail -n+2 ${sites} > ${sites}.noheader
-        python3 <<EOF
-        import os,glob,subprocess,time
-        files = sorted(glob.glob("*pheno_piece"))
-        import multiprocessing
-        def multiproc(i):
-            file = sorted(glob.glob("*pheno_piece"))[i]
-            print(file)
-            cmd = ["external_matrix.py", file, file + ".", "${sites}.noheader", "--chr", "#chrom", "--pos", "pos", "--ref", "ref", "--alt", "alt", "--no_require_match", "--no_tabix", "--all_fields"]
-            start = time.time()
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-            out,err = [elem.decode("utf-8").strip() for elem in p.communicate()]
-            print(f"{i}: file done.")
-            print("ERR: ",err)
-            print(f"It took {time.time() - start} seconds.")
 
-        cpus = multiprocessing.cpu_count()
-        pools = multiprocessing.Pool(cpus - 1)
-        pools.map(multiproc,range(len(files)))
-        pools.close()
+python3 <<EOF
+import os,glob,subprocess,time
+files = sorted(glob.glob("*pheno_piece"))
+import multiprocessing
+def multiproc(i):
+    file = sorted(glob.glob("*pheno_piece"))[i]
+    print(file)
+    cmd = ["external_matrix.py", file, file + ".", "${sites}.noheader", "--chr", "#chrom", "--pos", "pos", "--ref", "ref", "--alt", "alt", "--no_require_match", "--no_tabix", "--all_fields"]
+    start = time.time()
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    out,err = [elem.decode("utf-8").strip() for elem in p.communicate()]
+    print(f"{i}: file done.")
+    print("ERR: ",err)
+    print(f"It took {time.time() - start} seconds.")
 
-        EOF
+cpus = multiprocessing.cpu_count()
+pools = multiprocessing.Pool(cpus - 1)
+pools.map(multiproc,range(len(files)))
+pools.close()
+
+EOF
 
         cmd="paste <(cat ${sites} | sed 's/chrom/#chrom/') "
         for file in *pheno_piece.matrix.tsv; do
@@ -306,45 +307,45 @@ task matrix {
 
         pheweb top-hits
 
-        python3 <<EOF
-        import glob
-        import subprocess
-        import json,time
-        import multiprocessing
-        # get gene-to-pheno json per piece
-        files =  glob.glob("*pheno_piece.matrix.tsv")
-        def multiproc(i):
-            file = sorted(glob.glob("*pheno_piece.matrix.tsv"))[i]
-            print(file)
-            cmd = ["pheweb", "gather-pvalues-for-each-gene", file]
-            start = time.time()
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-            out,err = [elem.decode("utf-8").strip() for elem in p.communicate()]
-            print(f"{i}: file done.")
-            print("ERR: ",err)
-            print(f"It took {time.time() - start} seconds.")
+python3 <<EOF
+import glob
+import subprocess
+import json,time
+import multiprocessing
+# get gene-to-pheno json per piece
+files =  glob.glob("*pheno_piece.matrix.tsv")
+def multiproc(i):
+    file = sorted(glob.glob("*pheno_piece.matrix.tsv"))[i]
+    print(file)
+    cmd = ["pheweb", "gather-pvalues-for-each-gene", file]
+    start = time.time()
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    out,err = [elem.decode("utf-8").strip() for elem in p.communicate()]
+    print(f"{i}: file done.")
+    print("ERR: ",err)
+    print(f"It took {time.time() - start} seconds.")
 
-        cpus = multiprocessing.cpu_count()
-        pools = multiprocessing.Pool(cpus - 1)
-        pools.map(multiproc,range(len(files)))
-        pools.close()
+cpus = multiprocessing.cpu_count()
+pools = multiprocessing.Pool(cpus - 1)
+pools.map(multiproc,range(len(files)))
+pools.close()
 
-        # collect jsons
-        gene2phenos = {}
-        for file in glob.glob("*pheno_piece.matrix.tsv_best-phenos-by-gene.json"):
-            with open(file) as f:
-                j = json.load(f)
-                for gene in j:
-                    if gene not in gene2phenos:
-                        gene2phenos[gene] = []
-                    gene2phenos[gene].extend(j[gene])
-        for gene in gene2phenos:
-            phenos = sorted(gene2phenos[gene], key=lambda x: x['pval'])
-            n_sig = len([p for p in phenos if p['pval'] < 5e-8])
-            gene2phenos[gene] = phenos[:max(4,n_sig)]
-        with open('generated-by-pheweb/best-phenos-by-gene.json', 'w') as f:
-            json.dump(gene2phenos, f)
-        EOF
+# collect jsons
+gene2phenos = {}
+for file in glob.glob("*pheno_piece.matrix.tsv_best-phenos-by-gene.json"):
+    with open(file) as f:
+        j = json.load(f)
+        for gene in j:
+            if gene not in gene2phenos:
+                gene2phenos[gene] = []
+            gene2phenos[gene].extend(j[gene])
+for gene in gene2phenos:
+    phenos = sorted(gene2phenos[gene], key=lambda x: x['pval'])
+    n_sig = len([p for p in phenos if p['pval'] < 5e-8])
+    gene2phenos[gene] = phenos[:max(4,n_sig)]
+with open('generated-by-pheweb/best-phenos-by-gene.json', 'w') as f:
+    json.dump(gene2phenos, f)
+EOF
     # TODOD : verify number of columns
     >>>
 
