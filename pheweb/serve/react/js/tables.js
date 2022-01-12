@@ -414,14 +414,20 @@ const csTableCols = [{
     accessor: 'good_cs',
     filterMethod: (filter,row) => filter.value == row[filter.id],
     Cell: props => String(props.value),
-    minWidth: 60,
+    minWidth: 30,
 }, {
     Header: () => (<span title="chromosome" style={{textDecoration: 'underline'}}>chromosome</span>),
     accessor: 'chrom',
     Cell: props => props.value,
+    minWidth: 40,
+}, {
+    Header: () => (<span title="rsids" style={{textDecoration: 'underline'}}>rsids</span>),
+    accessor: 'lead_rsids',
+    Cell: props => props.value,
     minWidth: 50,
-}, { ... pval_column , minWidth: 50,
-}, { ... mlogp_column, accessor: 'lead_mlogp',  minWidth: 50, 
+},
+{ ... pval_column , minWidth: 40,
+}, { ... mlogp_column, accessor: 'lead_mlogp',  minWidth: 40,
 }, {
     Header: () => (<span title="effect size (beta)" style={{textDecoration: 'underline'}}>effect size (beta)</span>),
     accessor: 'lead_beta',
