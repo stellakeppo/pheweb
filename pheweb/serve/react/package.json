@@ -19,6 +19,7 @@
     "@types/react-test-renderer": "^16.9.3",
     "@types/react-tooltip": "^4.2.4",
     "@types/uuid": "^8.3.3",
+    "babel-jest": "^27.5.1",
     "d3": "^6.2.0",
     "d3-tip": "^0.9.1",
     "d3-v6-tip": "^1.0.9",
@@ -68,10 +69,10 @@
     "typescript-plugin-css-modules": "^3.4.0"
   },
   "scripts": {
+    "build": "react-scripts  build",
+    "start": "react-scripts start",
     "test": "react-scripts test --env=jsdom",
-    "start": "react-scripts  --openssl-legacy-provider start",
-    "build": "react-scripts  --openssl-legacy-provider build",
-    "eject": "react-scripts  --openssl-legacy-provider eject"
+    "eject": "react-scripts eject"
   },
   "author": "",
   "license": "ISC",
